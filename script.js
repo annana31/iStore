@@ -7,84 +7,165 @@ document.addEventListener("DOMContentLoaded", () => {
     const profileIcon = document.querySelector(".profile");
     const navItems = document.querySelectorAll("nav ul li");
 
-    let cart = [];
+    const cartItemsContainer = document.getElementById("cart-items");
 
-    // -----------------------
-    // ADD TO CART
-    // -----------------------
-    products.forEach(product => {
-        const button = product.querySelector("button");
-        button.addEventListener("click", () => {
-            const name = product.querySelector("h3").textContent;
-            const price = product.querySelector("p").textContent;
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-            cart.push({ name, price });
-            updateCartCount();
-        });
-    });
-
+    // =========================
+    // UPDATE CART COUNT
+    // =========================
     function updateCartCount() {
-        cartCount.textContent = cart.length;
+        if (cartCount) {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCount.textContent = totalItems;
+        }
     }
 
-    // -----------------------
-    // CART MODAL
-    // -----------------------
-    cartIcon.addEventListener("click", () => {
-        if (cart.length === 0) {
-            alert("Your cart is empty!");
-            return;
-        }
+    updateCartCount();
 
-        let message = "Your Cart:\n\n";
-        cart.forEach((item, index) => {
-            message += `${index + 1}. ${item.name} - ${item.price}\n`;
-        });
-
-        message += "\nClick OK to clear cart.";
-
-        if (confirm(message)) {
-            cart = [];
-            updateCartCount();
-        }
-    });
-
-    // -----------------------
-    // SEARCH FUNCTION
-    // -----------------------
-    searchInput.addEventListener("input", () => {
-        const searchValue = searchInput.value.toLowerCase();
-
+    // =========================
+    // ADD TO CART (STORE PAGE)
+    // =========================
+    if (products.length > 0) {
         products.forEach(product => {
-            const name = product.querySelector("h3").textContent.toLowerCase();
+            const button = product.querySelector("button");
 
-            if (name.includes(searchValue)) {
-                product.style.display = "block";
-            } else {
-                product.style.display = "none";
-            }
+            button.addEventListener("click", () => {
+                const name = product.querySelector("h3").textContent;
+                const priceText = product.querySelector("p").textContent;
+                const price = parseFloat(priceText.replace("$", ""));
+                const image = product.querySelector("img").src;
+
+                const existingItem = cart.find(item => item.name === name);
+
+                if (existingItem) {
+                    existingItem.quantity += 1;
+                } else {
+                    cart.push({
+                        name,
+                        price,
+                        image,
+                        quantity: 1
+                    });
+                }
+
+                localStorage.setItem("cart", JSON.stringify(cart));
+                updateCartCount();
+            });
         });
-    });
+    }
 
-    // -----------------------
-    // NAVIGATION MENU
-    // -----------------------
+    // =========================
+    // CART PAGE RENDER
+    // =========================
+    if (cartItemsContainer) {
+        renderCart();
+    }
+
+    function renderCart() {
+        cartItemsContainer.innerHTML = "";
+
+        let subtotal = 0;
+
+        cart.forEach((item, index) => {
+            subtotal += item.price * item.quantity;
+
+            cartItemsContainer.innerHTML += `
+                <div class="cart-item">
+                    <img src="${item.image}">
+                    <div class="item-details">
+                        <h3>${item.name}</h3>
+                        <div class="item-controls">
+                            <select onchange="updateQuantity(${index}, this.value)">
+                                ${[1,2,3,4,5].map(num =>
+                                    `<option value="${num}" ${num == item.quantity ? "selected" : ""}>${num}</option>`
+                                ).join("")}
+                            </select>
+                            <button class="remove-btn" onclick="removeItem(${index})">
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                    <h3>$${(item.price * item.quantity).toFixed(2)}</h3>
+                </div>
+            `;
+        });
+
+        updateTotals(subtotal);
+    }
+
+    function updateTotals(subtotal) {
+        const vat = subtotal * 0.05;
+        const total = subtotal + vat;
+
+        const subtotalEl = document.getElementById("subtotal");
+        const vatEl = document.getElementById("vat");
+        const finalTotalEl = document.getElementById("final-total");
+        const heroTotalEl = document.getElementById("cart-total");
+
+        if (subtotalEl) subtotalEl.textContent = "$" + subtotal.toFixed(2);
+        if (vatEl) vatEl.textContent = "$" + vat.toFixed(2);
+        if (finalTotalEl) finalTotalEl.textContent = total.toFixed(2);
+        if (heroTotalEl) heroTotalEl.textContent = total.toFixed(2);
+    }
+
+    // Make functions global so HTML can access them
+    window.updateQuantity = function(index, quantity) {
+        cart[index].quantity = parseInt(quantity);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        renderCart();
+        updateCartCount();
+    };
+
+    window.removeItem = function(index) {
+        cart.splice(index, 1);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        renderCart();
+        updateCartCount();
+    };
+
+    // =========================
+    // CART ICON → REDIRECT
+    // =========================
+    if (cartIcon) {
+        cartIcon.addEventListener("click", () => {
+            window.location.href = "cart.html";
+        });
+    }
+
+    // =========================
+    // SEARCH
+    // =========================
+    if (searchInput) {
+        searchInput.addEventListener("input", () => {
+            const searchValue = searchInput.value.toLowerCase();
+
+            products.forEach(product => {
+                const name = product.querySelector("h3").textContent.toLowerCase();
+                product.style.display = name.includes(searchValue) ? "block" : "none";
+            });
+        });
+    }
+
+    // =========================
+    // NAV
+    // =========================
     navItems.forEach(item => {
         item.addEventListener("click", () => {
             navItems.forEach(i => i.classList.remove("active"));
             item.classList.add("active");
-
-            alert(item.textContent + " section clicked!");
         });
     });
 
-    // -----------------------
-    // PROFILE ICON (LOGOUT)
-    // -----------------------
-    profileIcon.addEventListener("click", () => {
-        if (confirm("Do you want to logout?")) {
-            window.location.href = "index.html";
-        }
-    });
+    // =========================
+    // LOGOUT
+    // =========================
+    if (profileIcon) {
+        profileIcon.addEventListener("click", () => {
+            if (confirm("Do you want to logout?")) {
+                window.location.href = "index.html";
+            }
+        });
+    }
 
 });
