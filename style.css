@@ -302,3 +302,53 @@ nav input[type="search"] {
     width: 100%;
     margin-top: 20px;
 }
+
+/* =========================
+   ORDER CONFIRMATION MODAL
+========================= */
+.order-modal {
+    display: none; /* hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    justify-content: center;
+    align-items: center;
+}
+
+.order-modal-content {
+    background: #111; /* monovhrome dark */
+    color: #fff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+.order-modal-content h2 {
+    margin-bottom: 15px;
+}
+
+.order-modal-content p {
+    margin-bottom: 25px;
+}
+
+.order-modal-content button {
+    padding: 10px 25px;
+    background: #fff;
+    color: #111;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s ease;
+}
+
+.order-modal-content button:hover {
+    background: #ddd;
+}
