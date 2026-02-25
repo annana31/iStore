@@ -79,6 +79,37 @@ nav input[type="search"] {
     background: #fafafa;
 }
 
+.profile-dropdown {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: white;
+    min-width: 100px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 5px;
+    z-index: 100;
+}
+
+.dropdown-menu button {
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.dropdown-menu button:hover {
+    background-color: #f0f0f0;
+}
+
 /* =========================
    PRODUCTS GRID
 ========================= */

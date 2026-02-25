@@ -4,7 +4,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.querySelector("input[type='search']");
     const cartCount = document.querySelector(".count");
     const cartIcon = document.querySelector(".cart");
-    const profileIcon = document.querySelector(".profile");
+    const profileDropdown = document.querySelector(".profile-dropdown");
+    const dropdownMenu = document.querySelector(".dropdown-menu");
+    const logoutBtn = document.getElementById("logout-btn");
     const navItems = document.querySelectorAll("nav ul li");
 
     const cartItemsContainer = document.getElementById("cart-items");
@@ -158,14 +160,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // =========================
-    // LOGOUT
+    // PROFILE DROPDOWN TOGGLE + LOGOUT
     // =========================
-    if (profileIcon) {
-        profileIcon.addEventListener("click", () => {
-            if (confirm("Do you want to logout?")) {
-                window.location.href = "index.html";
-            }
+    if (profileDropdown && dropdownMenu) {
+        profileDropdown.addEventListener("click", (e) => {
+            e.stopPropagation();
+            dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
         });
     }
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+            window.location.href = "index.html";
+        });
+    }
+
+    // Close dropdown if click outside
+    document.addEventListener("click", () => {
+        if (dropdownMenu) {
+            dropdownMenu.style.display = "none";
+        }
+    });
 
 });
