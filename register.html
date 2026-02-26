@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>iStore Register</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="login-container">
+        <h1>Create Account</h1>
+
+        <form id="registerForm">
+            <input type="text" placeholder="Username" id="newUsername" required>
+            <input type="password" placeholder="Password" id="newPassword" required>
+            <input type="password" placeholder="Confirm Password" id="confirmPassword" required>
+            <button type="submit">Register</button>
+        </form>
+
+        <p class="switch-auth">
+            Already have an account? 
+            <a href="index.html">Login</a>
+        </p>
+
+        <p id="register-msg"></p>
+    </div>
+
+    <script>
+        document.getElementById("registerForm").addEventListener("submit", function(e){
+            e.preventDefault();
+
+            const username = document.getElementById("newUsername").value;
+            const password = document.getElementById("newPassword").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+
+            if(password !== confirmPassword){
+                document.getElementById("register-msg").textContent = "Passwords do not match!";
+                return;
+            }
+
+            // Temporary fake register (since no database yet)
+            alert("Account created successfully! You can now login.");
+            window.location.href = "index.html";
+        });
+    </script>
+
+</body>
+</html>
