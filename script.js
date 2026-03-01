@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateTotals(subtotal) {
         const vat = subtotal * 0.05;
-        const total = subtotal + vat;
+        const total = subtotal;
 
         const subtotalEl = document.getElementById("subtotal");
         const finalTotalEl = document.getElementById("final-total");
