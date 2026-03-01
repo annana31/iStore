@@ -10,18 +10,24 @@
 
 <header>
     <h1>iStore</h1>
-    <div class="cart-profile">
-        <span class="cart">Cart <span class="count">0</span></span>
 
-        <div class="profile-dropdown">
-            <span class="profile">Account</span>
-            <div class="dropdown-menu">
+    <div class="nav-right">
+        <!-- CART -->
+        <span class="cart" id="cart-icon">
+            Cart <span class="count">0</span>
+        </span>
+
+        <!-- ACCOUNT DROPDOWN -->
+        <div class="profile-dropdown" id="profile-dropdown">
+            <span class="account-btn">Account ▾</span>
+            <div class="dropdown-menu" id="dropdown-menu">
                 <button id="logout-btn">Logout</button>
             </div>
         </div>
     </div>
 </header>
 
+<!-- ===== NAVIGATION ===== -->
 <nav>
     <ul>
         <li class="active" data-category="all">Home</li>
@@ -35,12 +41,11 @@
 </nav>
 
 <main>
-
     <img src="assets/banner.png" alt="Flash Sale Banner" class="banner">
 
     <!-- SINGLE PRODUCT GRID -->
     <div class="products" id="product-list">
-
+        <!-- PRODUCTS ARE THE SAME AS BEFORE -->
         <!-- PHONES -->
         <div class="product" data-category="phones">
             <img src="assets/iphone14pro.png" alt="iPhone 14 Pro">
@@ -48,28 +53,24 @@
             <p>$999</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="phones">
             <img src="assets/iphone14.png" alt="iPhone 14">
             <h3>iPhone 14</h3>
             <p>$799</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="phones">
             <img src="assets/iphonese.png" alt="iPhone SE">
             <h3>iPhone SE</h3>
             <p>$429</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="phones">
             <img src="assets/iphone17pro.png" alt="iPhone 17 Pro">
             <h3>iPhone 17 Pro</h3>
             <p>$1199</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="phones">
             <img src="assets/iphone16.png" alt="iPhone 16">
             <h3>iPhone 16</h3>
@@ -84,28 +85,24 @@
             <p>$1099</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="ipads">
             <img src="assets/ipadair.png" alt="iPad Air">
             <h3>iPad Air</h3>
             <p>$799</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="ipads">
             <img src="assets/ipadairpurple.png" alt="iPad Mini">
             <h3>iPad Mini</h3>
             <p>$549</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="ipads">
             <img src="assets/ipadmini.png" alt="iPad Mini">
             <h3>iPad Mini</h3>
             <p>$560</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="ipads">
             <img src="assets/ipadpro11.png" alt="iPad">
             <h3>iPad</h3>
@@ -120,28 +117,24 @@
             <p>$999</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="macs">
             <img src="assets/macbookpro.png" alt="MacBook Pro">
             <h3>MacBook Pro</h3>
             <p>$1010</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="macs">
             <img src="assets/macbookpro14.png" alt="MacBook Pro 14">
             <h3>MacBook Pro 14</h3>
             <p>$1999</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="macs">
             <img src="assets/macbookairm4.png" alt="Macbook Air M4">
             <h3>Macbook Air M4</h3>
             <p>$1050</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="macs">
             <img src="assets/imac24.png" alt="iMac 24">
             <h3>iMac 24</h3>
@@ -156,28 +149,24 @@
             <p>$399</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="watches">
             <img src="assets/applewatchultra.png" alt="Apple Watch Ultra">
             <h3>Apple Watch Ultra</h3>
             <p>$799</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="watches">
             <img src="assets/applewatch10.png" alt="Apple Watch 10">
             <h3>Apple Watch 10</h3>
             <p>$599</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="watches">
             <img src="assets/applewatchair.png" alt="Apple Watch Air">
             <h3>Apple Watch Air</h3>
             <p>$599</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="watches">
             <img src="assets/applewatchh.png" alt="Apple Watch H">
             <h3>Apple Watch H</h3>
@@ -192,28 +181,24 @@
             <p>$249</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="accessories">
             <img src="assets/magicmouse.png" alt="Magic Mouse">
             <h3>Magic Mouse</h3>
             <p>$99</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="accessories">
             <img src="assets/magickeyboard.png" alt="Magic Keyboard">
             <h3>Magic Keyboard</h3>
             <p>$149</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="accessories">
             <img src="assets/applepencil.png" alt="Apple Pencil 2nd Gen">
             <h3>Apple Pencil 2nd Gen</h3>
             <p>$129</p>
             <button>Add to Cart</button>
         </div>
-
         <div class="product" data-category="accessories">
             <img src="assets/airpodsmax.png" alt="AirPods Max">
             <h3>AirPods Max</h3>
@@ -224,6 +209,8 @@
     </div>
 </main>
 
+<!-- ===== SCRIPT ===== -->
 <script src="script.js"></script>
+
 </body>
 </html>

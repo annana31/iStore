@@ -4,8 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.querySelector("input[type='search']");
     const cartCount = document.querySelector(".count");
     const cartIcon = document.querySelector(".cart");
-    const profileDropdown = document.querySelector(".profile");
-    const dropdownMenu = document.querySelector(".dropdown-menu");
+    const profileDropdown = document.querySelector(".profile-dropdown");
     const logoutBtn = document.getElementById("logout-btn");
     const navItems = document.querySelectorAll("nav ul li");
     const cartItemsContainer = document.getElementById("cart-items");
@@ -86,7 +85,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateTotals(subtotal) {
-        const vat = subtotal * 0.05;
         const total = subtotal;
 
         const subtotalEl = document.getElementById("subtotal");
@@ -145,17 +143,9 @@ document.addEventListener("DOMContentLoaded", () => {
             navItems.forEach(i => i.classList.remove("active"));
             item.classList.add("active");
 
-            const category = item.textContent.toLowerCase();
+            const category = item.dataset.category;
             products.forEach(product => {
-                const title = product.querySelector("h3").textContent.toLowerCase();
-                let productCategory = "accessories";
-                if (title.includes("iphone")) productCategory = "phones";
-                else if (title.includes("ipad")) productCategory = "ipads";
-                else if (title.includes("mac")) productCategory = "macs";
-                else if (title.includes("watch")) productCategory = "watches";
-
-                product.style.display = category === "home" ? "block" :
-                                        productCategory === category ? "block" : "none";
+                product.style.display = category === "all" || product.dataset.category === category ? "block" : "none";
             });
         });
     });
@@ -163,10 +153,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // =========================
     // PROFILE DROPDOWN + LOGOUT
     // =========================
-    if (profileDropdown && dropdownMenu) {
+    if (profileDropdown) {
         profileDropdown.addEventListener("click", e => {
             e.stopPropagation();
-            dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+            profileDropdown.classList.toggle("active");
+        });
+
+        document.addEventListener("click", () => {
+            profileDropdown.classList.remove("active");
         });
     }
 
@@ -176,10 +170,6 @@ document.addEventListener("DOMContentLoaded", () => {
             window.location.href = "index.html";
         });
     }
-
-    document.addEventListener("click", () => {
-        if (dropdownMenu) dropdownMenu.style.display = "none";
-    });
 
     // =========================
     // CHECKOUT MODAL
@@ -191,7 +181,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // Create modal dynamically if not present
             let modal = document.getElementById("order-modal");
             if (!modal) {
                 modal = document.createElement("div");

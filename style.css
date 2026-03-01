@@ -39,10 +39,85 @@ header {
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.cart-profile span {
-    margin-left: 20px;
+/* Right side: Cart + Account */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+/* Cart styling */
+.cart {
     cursor: pointer;
-    font-size: 18px;
+    font-size: 16px;
+    color: #555;
+    position: relative;
+    transition: 0.2s ease;
+}
+
+.cart:hover {
+    color: #000;
+}
+
+.cart .count {
+    background: #111;
+    color: #fff;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 50%;
+    position: absolute;
+    top: -8px;
+    right: -12px;
+}
+
+/* =========================
+   PROFILE DROPDOWN
+========================= */
+
+.profile-dropdown {
+    position: relative;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.account-btn {
+    font-size: 14px;
+    color: #555;
+}
+
+.account-btn:hover {
+    color: #000;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%; /* below the account button */
+    right: 0;
+    background: #fff;
+    min-width: 120px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-radius: 10px;
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.profile-dropdown.active .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu button {
+    width: 100%;
+    padding: 10px 14px;
+    border: none;
+    background: none;
+    text-align: left;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.dropdown-menu button:hover {
+    background: #f2f2f2;
 }
 
 /* =========================
@@ -88,43 +163,6 @@ nav input[type="search"] {
     border-radius: 20px;
     border: 1px solid #ddd;
     background: #fafafa;
-}
-
-/* =========================
-   PROFILE DROPDOWN
-========================= */
-
-.profile-dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    right: 0;
-    background: #fff;
-    min-width: 120px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    border-radius: 10px;
-    z-index: 100;
-}
-
-.profile-dropdown:hover .dropdown-menu {
-    display: block;
-}
-
-.dropdown-menu button {
-    width: 100%;
-    padding: 10px 14px;
-    border: none;
-    background: none;
-    text-align: left;
-    font-size: 14px;
-}
-
-.dropdown-menu button:hover {
-    background: #f2f2f2;
 }
 
 /* =========================
@@ -207,9 +245,9 @@ body.auth-page {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    background: #f5f5f5;
 }
 
-/* Container */
 .login-container {
     width: 380px;
     background: #fff;
@@ -286,22 +324,16 @@ body.auth-page {
 }
 
 /* =========================
-   CART PAGE
+   CART PAGE STYLES
 ========================= */
 
 .cart-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     padding: 20px 80px;
     background: #fff;
     border-bottom: 1px solid #eee;
-}
-
-.cart-header a {
-    margin-right: 25px;
-    text-decoration: none;
-    color: #555;
-    font-size: 14px;
 }
 
 .cart-hero {
@@ -374,10 +406,6 @@ body.auth-page {
     color: #888;
     font-size: 13px;
 }
-
-/* =========================
-   CART SUMMARY
-========================= */
 
 .cart-summary-box {
     flex: 1;
