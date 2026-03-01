@@ -6,13 +6,15 @@
 <title>Cart</title>
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="cart-page">
 
 <header class="cart-header">
-    <div class="nav-spacer"></div>
+    <div class="nav-spacer">
+        <h2 class="logo">iStore</h2>
+    </div>
 
     <div class="nav-right">
-        <a href="store.html">Home</a>
+        <a href="store.html" class="nav-link">Home</a>
 
         <div class="profile-dropdown" id="profile-dropdown">
             <span class="account-btn">Account ▾</span>
@@ -24,16 +26,25 @@
 </header>
 
 <section class="cart-hero">
-    <h1>Your cart total is $<span id="cart-total">0.00</span></h1>
-    <p>Free shipping and return</p>
+    <div class="hero-inner">
+        <h1>Your Bag</h1>
+        <p class="hero-total">
+            Total <strong>$<span id="cart-total">0.00</span></strong>
+        </p>
+        <p>Free shipping and returns on all orders.</p>
+    </div>
 </section>
 
 <section class="cart-container">
 
-    <!-- Cart Items will be dynamically injected here -->
+    <!-- LEFT SIDE -->
     <div id="cart-items"></div>
 
+    <!-- RIGHT SIDE -->
     <div class="cart-summary-box">
+
+        <h3 class="summary-heading">Order Summary</h3>
+
         <div class="summary-row">
             <span>Subtotal</span>
             <span id="subtotal">$0.00</span>
@@ -43,6 +54,7 @@
             <span>Shipping</span>
             <span>Free</span>
         </div>
+
         <hr>
 
         <div class="summary-total">
@@ -51,14 +63,17 @@
         </div>
 
         <button class="checkout-btn full-width">Check out</button>
+
+        <p class="secure-text">Secure checkout · Simple · Fast</p>
     </div>
 
 <!-- Order Confirmation Modal -->
 <div id="order-modal" class="order-modal">
     <div class="order-modal-content">
+        <div class="success-icon">✓</div>
         <h2>Order Placed!</h2>
         <p>Thank you for shopping with iStore.</p>
-        <button id="order-ok-btn">OK</button>
+        <button id="order-ok-btn">Continue</button>
     </div>
 </div>
 
@@ -70,28 +85,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const dropdownMenu = document.getElementById("dropdown-menu");
     const logoutBtn = document.getElementById("logout-btn");
 
-    // Toggle dropdown on click
     profileDropdown.addEventListener("click", e => {
         e.stopPropagation();
         dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
     });
 
-    // Close dropdown when clicking outside
     document.addEventListener("click", () => {
         if(dropdownMenu) dropdownMenu.style.display = "none";
     });
 
-    // Logout functionality
     if (logoutBtn) {
         logoutBtn.addEventListener("click", () => {
-            localStorage.removeItem("cart"); // optional: clear cart
+            localStorage.removeItem("cart");
             window.location.href = "index.html";
         });
     }
 });
 </script>
 
-<!-- Include the updated script.js here -->
 <script src="script.js"></script>
 </body>
 </html>
