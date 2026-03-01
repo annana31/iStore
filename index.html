@@ -7,39 +7,106 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="auth-page">
+
     <div class="login-container">
+
         <h1>Welcome to iStore</h1>
+
         <form id="loginForm">
-            <input type="text" placeholder="Username" id="username" required>
-            <input type="password" placeholder="Password" id="password" required>
+
+            <input 
+                type="text" 
+                name="username"
+                placeholder="Username" 
+                id="username" 
+                required
+            >
+
+            <input 
+                type="password" 
+                name="password"
+                placeholder="Password" 
+                id="password" 
+                required
+            >
+
             <button type="submit">Login</button>
+
         </form>
 
         <!-- Register Section -->
-        <p>Don't have an account?</p>
-        <a href="register.html">Register</a>
+        <p class="switch1-auth">
+            Don't have an account?
+            <a href="register.html">Register</a>
+        </p>
 
         <p id="error-msg"></p>
+
     </div>
 
-    <script>
-        document.getElementById("loginForm").addEventListener("submit", function(e){
-            e.preventDefault();
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
 
-            // simple validation
-            if(username === "admin" && password === "1234") {
-                window.location.href = "store.html";
-            } else {
-                document.getElementById("error-msg").textContent = "Invalid credentials!";
-            }
-        });
+<script>
 
-        // Register button redirect
-        document.getElementById("registerBtn").addEventListener("click", function(){
-            window.location.href = "register.html";
-        });
-    </script>
+document.getElementById("loginForm").addEventListener("submit", function(e){
+
+    e.preventDefault();
+
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    const msg = document.getElementById("error-msg");
+
+    if(username === "" || password === ""){
+        msg.style.color = "red";
+        msg.textContent = "Please fill all fields.";
+        return;
+    }
+
+    const formData = new FormData();
+
+    formData.append("username", username);
+    formData.append("password", password);
+
+
+    fetch("login.php", {
+
+        method: "POST",
+        body: formData
+
+    })
+    .then(response => response.text())
+    .then(data => {
+
+        if(data === "success"){
+
+            msg.style.color = "green";
+            msg.textContent = "Login successful! Redirecting...";
+
+            setTimeout(function(){
+
+                window.location.href = "store.php";
+
+            }, 1000);
+
+        }else{
+
+            msg.style.color = "red";
+            msg.textContent = data;
+
+        }
+
+    })
+    .catch(error => {
+
+        msg.style.color = "red";
+        msg.textContent = "Server error.";
+
+    });
+
+});
+
+</script>
+
+
 </body>
 </html>

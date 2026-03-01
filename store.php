@@ -1,3 +1,40 @@
+<?php 
+include "check_session.php";
+
+// DB connection
+$host = "localhost";
+$dbname = "store_db";
+$user = "root"; 
+$pass = "";     
+
+$conn = new mysqli($host, $user, $pass, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Handle AJAX request
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_to_cart') {
+    $product_name = $_POST['product_name'] ?? '';
+    $product_price = $_POST['product_price'] ?? 0;
+    $quantity = $_POST['quantity'] ?? 1;
+    $username = $_SESSION['username'] ?? 'Guest';
+
+
+    $stmt = $conn->prepare("INSERT INTO cart_items (username, product_name, product_price, quantity) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("ssdi", $username, $product_name, $product_price, $quantity);
+
+
+    if ($stmt->execute()) {
+        echo json_encode(['status' => 'success']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => $stmt->error]);
+    }
+    exit;
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

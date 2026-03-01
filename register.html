@@ -4,17 +4,50 @@
     <meta charset="UTF-8">
     <title>iStore Register</title>
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* optional message styling */
+        #register-msg{
+            margin-top:10px;
+            font-size:14px;
+            font-weight:bold;
+        }
+    </style>
 </head>
 <body class="auth-page">
 
     <div class="login-container">
+
         <h1>Create Account</h1>
 
         <form id="registerForm">
-            <input type="text" placeholder="Username" id="newUsername" required>
-            <input type="password" placeholder="Password" id="newPassword" required>
-            <input type="password" placeholder="Confirm Password" id="confirmPassword" required>
+
+            <input 
+                type="text" 
+                placeholder="Username" 
+                name="username"
+                id="newUsername" 
+                required
+            >
+
+            <input 
+                type="password" 
+                placeholder="Password" 
+                name="password"
+                id="newPassword" 
+                required
+            >
+
+            <input 
+                type="password" 
+                placeholder="Confirm Password" 
+                name="confirmPassword"
+                id="confirmPassword" 
+                required
+            >
+
             <button type="submit">Register</button>
+
         </form>
 
         <p class="switch-auth">
@@ -23,26 +56,84 @@
         </p>
 
         <p id="register-msg"></p>
+
     </div>
 
-    <script>
-        document.getElementById("registerForm").addEventListener("submit", function(e){
-            e.preventDefault();
 
-            const username = document.getElementById("newUsername").value;
-            const password = document.getElementById("newPassword").value;
-            const confirmPassword = document.getElementById("confirmPassword").value;
+<script>
 
-            if(password !== confirmPassword){
-                document.getElementById("register-msg").textContent = "Passwords do not match!";
-                return;
-            }
+document.getElementById("registerForm").addEventListener("submit", function(e){
 
-            // Temporary fake register (since no database yet)
-            alert("Account created successfully! You can now login.");
-            window.location.href = "index.html";
-        });
-    </script>
+    e.preventDefault();
+
+    const username = document.getElementById("newUsername").value.trim();
+    const password = document.getElementById("newPassword").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+
+    const msg = document.getElementById("register-msg");
+
+    /* FRONTEND VALIDATION */
+
+    if(username === "" || password === "" || confirmPassword === ""){
+        msg.style.color = "red";
+        msg.textContent = "Please fill all fields.";
+        return;
+    }
+
+    if(password !== confirmPassword){
+        msg.style.color = "red";
+        msg.textContent = "Passwords do not match.";
+        return;
+    }
+
+    /* SEND DATA TO register.php */
+
+    const formData = new FormData();
+    formData.append("username", username);
+    formData.append("password", password);
+    formData.append("confirmPassword", confirmPassword);
+
+
+    fetch("register.php", {
+
+        method: "POST",
+        body: formData
+
+    })
+    .then(response => response.text())
+    .then(data => {
+
+     if(data === "success"){
+
+    msg.style.color = "green";
+    msg.textContent = "Account created successfully! Redirecting...";
+
+    setTimeout(function(){
+
+        window.location.href = "store.php";
+
+    }, 1500);
+
+}
+else{
+
+            msg.style.color = "red";
+            msg.textContent = data;
+
+        }
+
+    })
+    .catch(error => {
+
+        msg.style.color = "red";
+        msg.textContent = "Server error. Please try again.";
+
+    });
+
+});
+
+</script>
+
 
 </body>
 </html>
