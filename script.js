@@ -272,4 +272,39 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+
+ // =========================
+// CENTERED MONOCHROME NOTIFICATION (ONLY ONE AT A TIME)
+// =========================
+const notificationContainer = document.getElementById("notification-container");
+let notifTimeout;
+
+function showNotification(message) {
+    let notif = notificationContainer.querySelector(".notification");
+
+    // Create notification element if not present
+    if (!notif) {
+        notif = document.createElement("div");
+        notif.className = "notification";
+        notificationContainer.appendChild(notif);
+    }
+
+    // Update text and show
+    notif.textContent = message;
+    notif.classList.add("show");
+
+    // Reset timer if already running
+    if (notifTimeout) clearTimeout(notifTimeout);
+
+    notifTimeout = setTimeout(() => {
+        notif.classList.remove("show");
+    }, 2500); // 2.5 seconds visibility
+}
+
+// Attach notification to "Add to Cart" buttons
+document.querySelectorAll(".product button").forEach(button => {
+    button.addEventListener("click", () => {
+        showNotification("Added to cart");
+    });
+});
 });

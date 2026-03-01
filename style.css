@@ -576,3 +576,37 @@ body.auth-page {
         gap: 12px;
     }
 }
+
+/* =========================
+   CENTERED MONOCHROME NOTIFICATION
+========================= */
+#notification-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    pointer-events: none; /* avoid blocking clicks */
+}
+
+.notification {
+    background-color: #111; /* dark monochrome */
+    color: #fff;
+    padding: 14px 28px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    font-size: 14px;
+    max-width: 280px;
+    text-align: center;
+    pointer-events: auto;
+    user-select: none;
+    margin: 0 auto;
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
