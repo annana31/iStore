@@ -2,6 +2,10 @@
    GLOBAL STYLES
 ========================= */
 
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -19,7 +23,7 @@ button {
 }
 
 button:hover {
-    opacity: 0.85;
+    opacity: 0.9;
 }
 
 /* =========================
@@ -93,17 +97,16 @@ nav input[type="search"] {
 .profile-dropdown {
     position: relative;
     display: inline-block;
-    cursor: pointer;
 }
 
 .dropdown-menu {
     display: none;
     position: absolute;
     right: 0;
-    background-color: white;
+    background: #fff;
     min-width: 120px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-radius: 10px;
     z-index: 100;
 }
 
@@ -113,16 +116,15 @@ nav input[type="search"] {
 
 .dropdown-menu button {
     width: 100%;
-    padding: 10px 12px;
+    padding: 10px 14px;
     border: none;
     background: none;
     text-align: left;
-    cursor: pointer;
     font-size: 14px;
 }
 
 .dropdown-menu button:hover {
-    background-color: #f0f0f0;
+    background: #f2f2f2;
 }
 
 /* =========================
@@ -139,7 +141,7 @@ nav input[type="search"] {
 }
 
 /* =========================
-   PRODUCTS GRID (UPDATED)
+   PRODUCTS GRID
 ========================= */
 
 .products {
@@ -152,7 +154,7 @@ nav input[type="search"] {
 .product {
     background: #fff;
     padding: 25px;
-    border-radius: 14px;
+    border-radius: 16px;
     box-shadow: 0 4px 14px rgba(0,0,0,0.05);
     text-align: center;
     display: flex;
@@ -162,8 +164,8 @@ nav input[type="search"] {
 }
 
 .product:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    transform: translateY(-6px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
 }
 
 .product img {
@@ -180,7 +182,7 @@ nav input[type="search"] {
 
 .product p {
     font-weight: bold;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .product button {
@@ -190,48 +192,97 @@ nav input[type="search"] {
     border: none;
     border-radius: 25px;
     font-size: 14px;
-    transition: 0.2s ease;
 }
 
 .product button:hover {
-    background: #333;
+    background: #000;
 }
 
 /* =========================
-   LOGIN PAGE
+   AUTH PAGES (LOGIN + REGISTER)
 ========================= */
 
+body.auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Container */
 .login-container {
-    width: 320px;
-    margin: 150px auto;
-    text-align: center;
+    width: 380px;
     background: #fff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    padding: 40px;
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.05);
+    text-align: center;
+    animation: fadeUp 0.4s ease;
+}
+
+.login-container h1 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 30px;
 }
 
 .login-container input {
     width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border-radius: 6px;
+    padding: 14px;
+    margin-bottom: 18px;
+    border-radius: 10px;
     border: 1px solid #ddd;
+    background: #fafafa;
+    font-size: 14px;
+    transition: 0.2s ease;
+}
+
+.login-container input:focus {
+    outline: none;
+    border-color: #111;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
 }
 
 .login-container button {
-    padding: 12px;
     width: 100%;
-    background: #000;
-    color: #fff;
+    padding: 14px;
+    border-radius: 10px;
     border: none;
-    border-radius: 6px;
+    background: #111;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    margin-top: 5px;
 }
 
-#error-msg {
-    color: #000;
+.login-container button:hover {
+    background: #000;
+    transform: translateY(-1px);
+}
+
+.switch-auth {
+    margin-top: 25px;
     font-size: 14px;
-    margin-top: 10px;
+    color: #666;
+}
+
+.switch-auth a {
+    color: #000;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.switch-auth a:hover {
+    text-decoration: underline;
+}
+
+#error-msg,
+#register-msg {
+    margin-top: 15px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #000;
 }
 
 /* =========================
@@ -273,7 +324,7 @@ nav input[type="search"] {
     background: #111;
     color: #fff;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
 }
 
 .cart-container {
@@ -324,12 +375,15 @@ nav input[type="search"] {
     font-size: 13px;
 }
 
+/* =========================
+   CART SUMMARY
+========================= */
+
 .cart-summary-box {
     flex: 1;
     background: #fafafa;
     padding: 30px;
-    border-radius: 12px;
-    height: fit-content;
+    border-radius: 16px;
 }
 
 .summary-row {
@@ -359,10 +413,7 @@ nav input[type="search"] {
 .order-modal {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     background: rgba(0,0,0,0.5);
     z-index: 200;
     justify-content: center;
@@ -372,12 +423,11 @@ nav input[type="search"] {
 .order-modal-content {
     background: #111;
     color: #fff;
-    padding: 30px 40px;
-    border-radius: 12px;
+    padding: 35px 45px;
+    border-radius: 18px;
     text-align: center;
     max-width: 400px;
     width: 90%;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
 
 .order-modal-content button {
@@ -385,7 +435,7 @@ nav input[type="search"] {
     background: #fff;
     color: #111;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-weight: bold;
 }
 
@@ -394,26 +444,16 @@ nav input[type="search"] {
 }
 
 /* =========================
-   REGISTER PAGE
+   ANIMATIONS
 ========================= */
 
-.switch-auth {
-    margin-top: 15px;
-    font-size: 14px;
-}
-
-.switch-auth a {
-    color: #000;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.switch-auth a:hover {
-    text-decoration: underline;
-}
-
-#register-msg {
-    margin-top: 10px;
-    font-size: 14px;
-    color: #000;
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
