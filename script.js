@@ -41,7 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (existingItem) {
                     existingItem.quantity += 1;
                 } else {
-                    cart.push({ name, price, image, quantity: 1 });
+                    // default color as first option
+                    cart.push({ name, price, image, quantity: 1, color: "Red" });
                 }
 
                 localStorage.setItem("cart", JSON.stringify(cart));
@@ -63,25 +64,39 @@ document.addEventListener("DOMContentLoaded", () => {
             subtotal += item.price * item.quantity;
 
             cartItemsContainer.innerHTML += `
-                <div class="cart-item">
+                <div class="cart-item" data-index="${index}">
                     <img src="${item.image}" alt="${item.name}">
                     <div class="item-details">
                         <h3>${item.name}</h3>
-                        <div class="item-controls">
-                            <select onchange="updateQuantity(${index}, this.value)">
-                                ${[1,2,3,4,5].map(num =>
-                                    `<option value="${num}" ${num == item.quantity ? "selected" : ""}>${num}</option>`
+                        <p>$${item.price.toFixed(2)}</p>
+
+                        <!-- Quantity Selector -->
+                        <div class="quantity-selector">
+                            <button class="decrease-btn">−</button>
+                            <input type="number" class="quantity-input" value="${item.quantity}" min="1">
+                            <button class="increase-btn">+</button>
+                        </div>
+
+                        <!-- Color Selector -->
+                        <div class="color-selector">
+                            <label for="color-select-${index}">Color:</label>
+                            <select class="color-select" id="color-select-${index}">
+                                ${["Blue", "Deep Purple", "Green", "Midnight", "Pink", "Purple", "Red", "Silver", "Sky Blue", "Space Black", "Starlight", "White"].map(color => 
+                                    `<option value="${color}" ${item.color === color ? "selected" : ""}>${color}</option>`
                                 ).join("")}
                             </select>
-                            <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
                         </div>
+
+                        <button class="remove-btn">Remove</button>
                     </div>
-                    <h3>$${(item.price * item.quantity).toFixed(2)}</h3>
+
+                    <h3 class="item-total">$${(item.price * item.quantity).toFixed(2)}</h3>
                 </div>
             `;
         });
 
         updateTotals(subtotal);
+        attachCartItemEvents(); // attach events after rendering
     }
 
     function updateTotals(subtotal) {
@@ -97,21 +112,61 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // =========================
-    // GLOBAL FUNCTIONS
+    // CART ITEM EVENTS
     // =========================
-    window.updateQuantity = function(index, quantity) {
-        cart[index].quantity = parseInt(quantity);
-        localStorage.setItem("cart", JSON.stringify(cart));
-        renderCart();
-        updateCartCount();
-    };
+    function attachCartItemEvents() {
+        document.querySelectorAll(".cart-item").forEach(itemEl => {
+            const index = parseInt(itemEl.dataset.index);
+            const decreaseBtn = itemEl.querySelector(".decrease-btn");
+            const increaseBtn = itemEl.querySelector(".increase-btn");
+            const quantityInput = itemEl.querySelector(".quantity-input");
+            const colorSelect = itemEl.querySelector(".color-select");
+            const removeBtn = itemEl.querySelector(".remove-btn");
 
-    window.removeItem = function(index) {
-        cart.splice(index, 1);
+            decreaseBtn.onclick = () => {
+                if (cart[index].quantity > 1) cart[index].quantity -= 1;
+                quantityInput.value = cart[index].quantity;
+                updateCartItemTotal(index, itemEl);
+            };
+
+            increaseBtn.onclick = () => {
+                cart[index].quantity += 1;
+                quantityInput.value = cart[index].quantity;
+                updateCartItemTotal(index, itemEl);
+            };
+
+            quantityInput.onchange = () => {
+                let val = parseInt(quantityInput.value);
+                if (isNaN(val) || val < 1) val = 1;
+                cart[index].quantity = val;
+                quantityInput.value = val;
+                updateCartItemTotal(index, itemEl);
+            };
+
+            colorSelect.onchange = () => {
+                cart[index].color = colorSelect.value;
+                localStorage.setItem("cart", JSON.stringify(cart));
+            };
+
+            removeBtn.onclick = () => {
+                cart.splice(index, 1);
+                localStorage.setItem("cart", JSON.stringify(cart));
+                renderCart();
+                updateCartCount();
+            };
+        });
+
         localStorage.setItem("cart", JSON.stringify(cart));
-        renderCart();
         updateCartCount();
-    };
+    }
+
+    function updateCartItemTotal(index, itemEl) {
+        const totalEl = itemEl.querySelector(".item-total");
+        totalEl.textContent = "$" + (cart[index].price * cart[index].quantity).toFixed(2);
+        updateTotals(cart.reduce((sum, item) => sum + item.price * item.quantity, 0));
+        localStorage.setItem("cart", JSON.stringify(cart));
+        updateCartCount();
+    }
 
     // =========================
     // CART ICON → REDIRECT

@@ -26,11 +26,11 @@
 <section class="cart-hero">
     <h1>Your cart total is $<span id="cart-total">0.00</span></h1>
     <p>Free shipping and return</p>
-    <button class="checkout-btn">Check out</button>
 </section>
 
 <section class="cart-container">
 
+    <!-- Cart Items will be dynamically injected here -->
     <div id="cart-items"></div>
 
     <div class="cart-summary-box">
@@ -56,7 +56,7 @@
 <!-- Order Confirmation Modal -->
 <div id="order-modal" class="order-modal">
     <div class="order-modal-content">
-        <h2>✅ Order Placed!</h2>
+        <h2>Order Placed!</h2>
         <p>Thank you for shopping with iStore.</p>
         <button id="order-ok-btn">OK</button>
     </div>
@@ -91,6 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+<!-- Include the updated script.js here -->
 <script src="script.js"></script>
 </body>
 </html>
