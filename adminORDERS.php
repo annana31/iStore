@@ -1,12 +1,17 @@
 <?php
 session_start();
 
+// Redirect if not admin
 if (!isset($_SESSION["admin_id"]) || $_SESSION["role"] !== "admin") {
     header("Location: adminLOGIN.html");
     exit();
 }
-?>
 
+$conn = new mysqli("localhost", "root", "", "store_db");
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -14,25 +19,16 @@ if (!isset($_SESSION["admin_id"]) || $_SESSION["role"] !== "admin") {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin - Orders</title>
-
 <style>
-/* ======================
-   GLOBAL
-====================== */
+/* ====================== GLOBAL ====================== */
 body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     background: #f5f5f7;
 }
+a { text-decoration: none; color: inherit; }
 
-a {
-    text-decoration: none;
-    color: inherit;
-}
-
-/* ======================
-   NAVBAR
-====================== */
+/* ====================== NAVBAR ====================== */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -41,35 +37,11 @@ a {
     background: #111;
     color: #fff;
 }
-
-.navbar .nav-left {
-    display: flex;
-    gap: 25px;
-}
-
-.navbar .nav-left a {
-    color: #fff;
-    font-weight: 500;
-    font-size: 15px;
-    transition: 0.2s ease;
-}
-
-.navbar .nav-left a:hover {
-    color: #8b8b8b;
-}
-
-/* ACCOUNT DROPDOWN */
-.navbar .account {
-    position: relative;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 15px;
-}
-
-.navbar .account:hover {
-    color: #8b8b8b;
-}
-
+.navbar .nav-left { display: flex; gap: 25px; }
+.navbar .nav-left a { color: #fff; font-weight: 500; font-size: 15px; transition: 0.2s ease; }
+.navbar .nav-left a:hover { color: #8b8b8b; }
+.navbar .account { position: relative; cursor: pointer; font-weight: 500; font-size: 15px; }
+.navbar .account:hover { color: #8b8b8b; }
 .dropdown-menu {
     display: none;
     position: absolute;
@@ -83,7 +55,6 @@ a {
     overflow: hidden;
     z-index: 100;
 }
-
 .dropdown-menu button {
     width: 100%;
     padding: 10px 16px;
@@ -94,35 +65,18 @@ a {
     font-size: 14px;
     transition: 0.2s ease;
 }
+.dropdown-menu button:hover { background: #f0f0f0; }
 
-.dropdown-menu button:hover {
-    background: #f0f0f0;
-}
+/* ====================== CONTAINER ====================== */
+.container { padding: 40px; max-width: 1400px; margin: auto; }
 
-/* ======================
-   CONTAINER
-====================== */
-.container {
-    padding: 40px;
-    max-width: 1400px;
-    margin: auto;
-}
-
-/* ======================
-   ORDERS SECTION (SCOPED)
-====================== */
-orders .orders-title {
-    font-size: 22px;
-    font-weight: 600;
-    margin-bottom: 25px;
-}
-
+/* ====================== ORDERS SECTION ====================== */
+orders .orders-title { font-size: 22px; font-weight: 600; margin-bottom: 25px; }
 orders .orders-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
     gap: 20px;
 }
-
 orders .order-card {
     background: #fff;
     padding: 20px;
@@ -134,44 +88,12 @@ orders .order-card {
     gap: 15px;
     transition: 0.2s ease;
 }
-
-orders .order-card:hover {
-    transform: translateY(-3px);
-}
-
-orders .order-image {
-    width: 80px;
-    height: 80px;
-    border-radius: 12px;
-    object-fit: contain;
-    background: #f7f7f7;
-    flex-shrink: 0;
-}
-
-orders .order-details {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-orders .order-details .product-name {
-    font-weight: 600;
-    font-size: 16px;
-    color: #111;
-}
-
-orders .order-details .quantity {
-    font-size: 14px;
-    color: #555;
-}
-
-orders .order-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
+orders .order-card:hover { transform: translateY(-3px); }
+orders .order-details { flex-grow: 1; display: flex; flex-direction: column; gap: 5px; }
+orders .order-details .product-name { font-weight: 600; font-size: 16px; color: #111; }
+orders .order-details .quantity { font-size: 14px; color: #555; }
+orders .order-details strong.status { font-weight: 600; }
+orders .order-actions { display: flex; flex-direction: column; gap: 8px; }
 orders .confirm-btn {
     background: #000000;
     color: white;
@@ -182,11 +104,7 @@ orders .confirm-btn {
     font-weight: 600;
     transition: 0.2s ease;
 }
-
-orders .confirm-btn:hover {
-    background: #222121;
-}
-
+orders .confirm-btn:hover { background: #222121; }
 orders .remove-btn {
     background: #ccc;
     color: #111;
@@ -197,14 +115,9 @@ orders .remove-btn {
     font-weight: 600;
     transition: 0.2s ease;
 }
+orders .remove-btn:hover { background: #b3b3b3; }
 
-orders .remove-btn:hover {
-    background: #b3b3b3;
-}
-
-/* ======================
-   TOAST NOTIFICATIONS
-====================== */
+/* ====================== TOAST ====================== */
 #toast {
     position: fixed;
     top: 20px;
@@ -219,28 +132,19 @@ orders .remove-btn:hover {
     transition: opacity 0.3s ease, transform 0.3s ease;
     z-index: 999;
 }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-#toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
-
-/* ======================
-   REMOVE MODAL
-====================== */
+/* ====================== REMOVE MODAL ====================== */
 #remove-modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     background: rgba(0,0,0,0.5);
     display: none;
     justify-content: center;
     align-items: center;
     z-index: 1000;
 }
-
 #remove-modal .modal-content {
     background: #fff;
     padding: 30px 40px;
@@ -249,13 +153,7 @@ orders .remove-btn:hover {
     max-width: 400px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
-
-#remove-modal .modal-content p {
-    margin-bottom: 20px;
-    font-size: 16px;
-    color: #111;
-}
-
+#remove-modal .modal-content p { margin-bottom: 20px; font-size: 16px; color: #111; }
 #remove-modal .modal-content button {
     padding: 8px 16px;
     margin: 0 10px;
@@ -266,25 +164,10 @@ orders .remove-btn:hover {
     font-size: 14px;
     transition: 0.2s ease;
 }
-
-#remove-modal .modal-content .yes-btn {
-    background: #000000;
-    color: white;
-}
-
-#remove-modal .modal-content .yes-btn:hover {
-    background: #363636;
-}
-
-#remove-modal .modal-content .cancel-btn {
-    background: #ccc;
-    color: #111;
-}
-
-#remove-modal .modal-content .cancel-btn:hover {
-    background: #b3b3b3;
-}
-
+#remove-modal .modal-content .yes-btn { background: #000; color: white; }
+#remove-modal .modal-content .yes-btn:hover { background: #363636; }
+#remove-modal .modal-content .cancel-btn { background: #ccc; color: #111; }
+#remove-modal .modal-content .cancel-btn:hover { background: #b3b3b3; }
 </style>
 </head>
 <body>
@@ -292,9 +175,9 @@ orders .remove-btn:hover {
 <!-- NAVBAR -->
 <div class="navbar">
     <div class="nav-left">
-        <a href="#">Orders</a>
-        <a href="#">Products</a>
-        <a href="#">Users</a>
+        <a href="adminORDERS.php">Orders</a>
+        <a href="adminPRODUCTS.php">Products</a>
+        <a href="adminUSERS.php">Users</a>
     </div>
     <div class="account" id="account-btn">Account
         <div class="dropdown-menu" id="account-dropdown">
@@ -304,55 +187,50 @@ orders .remove-btn:hover {
 </div>
 
 <div class="container">
-
-    <!-- ORDERS SECTION -->
     <orders>
         <div class="orders-title">Orders</div>
         <div class="orders-grid">
+        <?php
+        $sql = "SELECT * FROM cart_items ORDER BY added_at DESC";
+        $result = $conn->query($sql);
 
-            <!-- EXAMPLE ORDER CARD -->
-            <div class="order-card">
-                <img class="order-image" src="assets/iphone14pro.png" alt="iPhone 14 Pro">
-                <div class="order-details">
-                    <div class="product-name">iPhone 14 Pro</div>
-                    <div class="quantity">Quantity: 2</div>
-                </div>
-                <div class="order-actions">
-                    <button class="confirm-btn">Confirm</button>
-                    <button class="remove-btn">Remove</button>
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+        ?>
+        <div class="order-card" id="order-<?= $row['id']; ?>">
+            <div class="order-details">
+                <div class="product-name"><?= htmlspecialchars($row['product_name']); ?></div>
+                <div class="quantity">Price: ₱<?= number_format($row['product_price'],2); ?></div>
+                <div class="quantity">Quantity: <?= $row['quantity']; ?></div>
+                <div class="quantity">User: <?= htmlspecialchars($row['username']); ?></div>
+                <div class="quantity">Ordered at: <?= $row['added_at']; ?></div>
+                <div class="quantity">
+                    Status:
+                    <strong class="status" style="color: <?= ($row['status']=='Confirmed')?'green':'orange'; ?>;">
+                        <?= $row['status']; ?>
+                    </strong>
                 </div>
             </div>
-
-            <div class="order-card">
-                <img class="order-image" src="assets/macbookpro14.png" alt="MacBook Pro 14">
-                <div class="order-details">
-                    <div class="product-name">MacBook Pro 14</div>
-                    <div class="quantity">Quantity: 1</div>
-                </div>
-                <div class="order-actions">
-                    <button class="confirm-btn">Confirm</button>
-                    <button class="remove-btn">Remove</button>
-                </div>
+            <div class="order-actions">
+                <?php if($row['status']=='Pending'): ?>
+                <button class="confirm-btn" data-id="<?= $row['id']; ?>">Confirm</button>
+                <button class="remove-btn" data-id="<?= $row['id']; ?>">Remove</button>
+                <?php else: ?>
+                Confirmed
+                <?php endif; ?>
             </div>
-
-            <div class="order-card">
-                <img class="order-image" src="assets/applewatch8.png" alt="Apple Watch Series 8">
-                <div class="order-details">
-                    <div class="product-name">Apple Watch Series 8</div>
-                    <div class="quantity">Quantity: 3</div>
-                </div>
-                <div class="order-actions">
-                    <button class="confirm-btn">Confirm</button>
-                    <button class="remove-btn">Remove</button>
-                </div>
-            </div>
-
+        </div>
+        <?php
+            }
+        } else {
+            echo "<p>No orders found.</p>";
+        }
+        ?>
         </div>
     </orders>
-
 </div>
 
-<!-- Confirm Toast -->
+<!-- Toast -->
 <div id="toast"></div>
 
 <!-- Remove Modal -->
@@ -364,76 +242,85 @@ orders .remove-btn:hover {
     </div>
 </div>
 
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 // Account dropdown
 const accountBtn = document.getElementById('account-btn');
 const accountDropdown = document.getElementById('account-dropdown');
 const logoutBtn = document.getElementById('logout-btn');
-
 accountBtn.addEventListener('click', () => {
-    accountDropdown.style.display = accountDropdown.style.display === 'block' ? 'none' : 'block';
+    accountDropdown.style.display = accountDropdown.style.display==='block'?'none':'block';
 });
-
-document.addEventListener('click', (e) => {
-    if(!accountBtn.contains(e.target)) accountDropdown.style.display = 'none';
+document.addEventListener('click', e => {
+    if(!accountBtn.contains(e.target)) accountDropdown.style.display='none';
 });
-
-// Navbar navigation
-document.querySelector('.nav-left a:nth-child(1)').addEventListener('click', () => { window.location.href = 'adminORDERS.html'; });
-document.querySelector('.nav-left a:nth-child(2)').addEventListener('click', () => { window.location.href = 'adminPRODUCTS.html'; });
-document.querySelector('.nav-left a:nth-child(3)').addEventListener('click', () => { window.location.href = 'adminUSERS.html'; });
-
-// Logout
-logoutBtn.addEventListener('click', () => { window.location.href = 'admin_logout.php'; });
+logoutBtn.addEventListener('click', () => { window.location.href='admin_logout.php'; });
 
 // Toast
 const toast = document.getElementById('toast');
-function showToast(message) {
-    toast.textContent = message;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2000);
-}
+function showToast(msg){ toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2000); }
 
-// Remove modal
-const removeModal = document.getElementById('remove-modal');
-let currentOrderToRemove = null;
-
-document.querySelectorAll('.confirm-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const orderCard = btn.closest('.order-card');
-        orderCard.remove(); // Remove the order
-        showToast('Order Confirmed');
+// Confirm order via AJAX
+$(document).ready(function(){
+    $('.confirm-btn').click(function(){
+        var orderId = $(this).data('id');
+        var button = $(this);
+        var statusEl = $('#order-'+orderId+' strong.status');
+        $.ajax({
+            url: 'confirm_order.php',
+            method: 'POST',
+            data: { id: orderId },
+            success: function(resp){
+                if(resp.trim()=='success'){
+                    statusEl.text('Confirmed').css('color','green');
+                    button.replaceWith('Confirmed');
+                    showToast('Order Confirmed');
+                } else { alert('Failed to confirm order.'); }
+            },
+            error:function(){ alert('Error connecting to server.'); }
+        });
     });
 });
 
-document.querySelectorAll('.remove-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        currentOrderToRemove = btn.closest('.order-card');
-        removeModal.style.display = 'flex';
+// Remove order
+$('.remove-btn').click(function(){
+    currentOrderToRemove = $(this).closest('.order-card')[0];
+    var orderId = $(this).data('id');
+    $('#remove-modal').css('display','flex');
+
+    // Yes button click
+    $('#remove-modal .yes-btn').off('click').on('click', function(){
+        $.ajax({
+            url: 'remove_order.php',
+            method: 'POST',
+            data: { id: orderId },
+            success: function(resp){
+                if(resp.trim() == 'success'){
+                    $(currentOrderToRemove).remove();
+                    showToast('Order Removed');
+                } else {
+                    alert('Failed to remove order.');
+                }
+                $('#remove-modal').hide();
+                currentOrderToRemove = null;
+            },
+            error: function(){
+                alert('Error connecting to server.');
+                $('#remove-modal').hide();
+                currentOrderToRemove = null;
+            }
+        });
     });
-});
 
-// Modal buttons
-removeModal.querySelector('.yes-btn').addEventListener('click', () => {
-    if(currentOrderToRemove) currentOrderToRemove.remove();
-    removeModal.style.display = 'none';
-    showToast('Order Removed');
-    currentOrderToRemove = null;
-});
-
-removeModal.querySelector('.cancel-btn').addEventListener('click', () => {
-    removeModal.style.display = 'none';
-    currentOrderToRemove = null;
-});
-
-// Close modal if clicking outside content
-removeModal.addEventListener('click', (e) => {
-    if(e.target === removeModal){
-        removeModal.style.display = 'none';
+    // Cancel button click
+    $('#remove-modal .cancel-btn').off('click').on('click', function(){
+        $('#remove-modal').hide();
         currentOrderToRemove = null;
-    }
+    });
 });
-</script>
 
+
+</script>
 </body>
 </html>
