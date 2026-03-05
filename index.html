@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>iStore | Premium Apple Experience</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Thin White Navbar (Top Only) -->
+<nav class="landing-navbar">
+  <ul class="landing-nav-links">
+    <li><a href="login.html">Login</a></li>
+    <li><a href="adminLOGIN.html">Admin</a></li>
+  </ul>
+</nav>
+
+<div id="notification-container"></div>
+
+<!-- Landing Hero Section -->
+<section class="landing-hero container">
+  <div class="hero-content">
+    <h1>iStore</h1>
+    <h2>Think Different. Experience Excellence.</h2>
+    <p>
+      Welcome to iStore — your trusted destination for world-class Apple innovation.
+      We deliver cutting-edge performance, iconic design, and seamless ecosystem
+      integration tailored for professionals and creators who demand more.
+    </p>
+    <button class="hero-btn"
+      onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">
+      Explore Products
+    </button>
+  </div>
+
+  <div class="hero-image">
+    <img src="assets/landing.png" alt="iStore Landing" />
+  </div>
+</section>
+
+<!-- Featured Products Section -->
+<section class="featured-section container" id="products">
+  <h2 class="featured-title">Featured Apple Devices</h2>
+
+  <div class="featured-row">
+
+    <div class="featured-card product" data-category="phones">
+      <img src="assets/iphone17pro.png" alt="iPhone 17 Pro" />
+      <h3>iPhone 17 Pro</h3>
+      <p>$1199</p>
+      <div class="qty-selector">
+        <button class="qty-decrease">−</button>
+        <input type="number" value="1" min="1" class="qty-input" />
+        <button class="qty-increase">+</button>
+      </div>
+      <button class="add-btn" onclick="window.location.href='login.html'">
+        Add to Cart
+      </button>
+    </div>
+
+    <div class="featured-card product" data-category="laptops">
+      <img src="assets/macbookpro14.png" alt="MacBook Pro 14" />
+      <h3>MacBook Pro 14"</h3>
+      <p>$1999</p>
+      <div class="qty-selector">
+        <button class="qty-decrease">−</button>
+        <input type="number" value="1" min="1" class="qty-input" />
+        <button class="qty-increase">+</button>
+      </div>
+      <button class="add-btn" onclick="window.location.href='login.html'">
+        Add to Cart
+      </button>
+    </div>
+
+    <div class="featured-card product" data-category="accessories">
+      <img src="assets/magicmouse.png" alt="Magic Mouse" />
+      <h3>Magic Mouse</h3>
+      <p>$99</p>
+      <div class="qty-selector">
+        <button class="qty-decrease">−</button>
+        <input type="number" value="1" min="1" class="qty-input" />
+        <button class="qty-increase">+</button>
+      </div>
+      <button class="add-btn" onclick="window.location.href='login.html'">
+        Add to Cart
+      </button>
+    </div>
+
+    <div class="featured-card product" data-category="wearables">
+      <img src="assets/applewatchultra.png" alt="Apple Watch Ultra" />
+      <h3>Apple Watch Ultra</h3>
+      <p>$799</p>
+      <div class="qty-selector">
+        <button class="qty-decrease">−</button>
+        <input type="number" value="1" min="1" class="qty-input" />
+        <button class="qty-increase">+</button>
+      </div>
+      <button class="add-btn" onclick="window.location.href='login.html'">
+        Add to Cart
+      </button>
+    </div>
+
+    <div class="featured-card product" data-category="audio">
+      <img src="assets/airpodsmax.png" alt="AirPods Max" />
+      <h3>AirPods Max</h3>
+      <p>$549</p>
+      <div class="qty-selector">
+        <button class="qty-decrease">−</button>
+        <input type="number" value="1" min="1" class="qty-input" />
+        <button class="qty-increase">+</button>
+      </div>
+      <button class="add-btn" onclick="window.location.href='login.html'">
+        Add to Cart
+      </button>
+    </div>
+
+  </div>
+
+  <!-- View More Products (Right Side) -->
+  <div class="view-more-container">
+    <a href="login.html" class="view-more-link">
+      Click to view more Products →
+    </a>
+  </div>
+
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iStore Login</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+/* PAGE LAYOUT */
+.auth-wrapper{
+    display:flex;
+    height:100vh;
+    width:100%;
+    font-family: Arial, sans-serif;
+}
+
+/* LEFT SIDE */
+.auth-left{
+    width:50%;
+    background:black;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.auth-left img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
+
+/* RIGHT SIDE */
+.auth-right{
+    width:50%;
+    background:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* LOGIN BOX */
+.login-container{
+    width:350px;
+    text-align:center;
+}
+
+.login-container h1{
+    margin-bottom:20px;
+}
+
+/* INPUTS */
+.login-container input{
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:14px;
+}
+
+/* PASSWORD WRAPPER */
+.password-wrapper{
+    position:relative;
+}
+
+/* EYE ICON */
+.eye-icon{
+    position:absolute;
+    right:12px;
+    top:50%;
+    transform:translateY(-50%);
+    cursor:pointer;
+    font-size:16px;
+    color:#777;
+}
+
+/* BUTTON */
+.login-container button{
+    width:100%;
+    padding:12px;
+    background:black;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+.login-container button:hover{
+    background:#333;
+}
+
+.switch1-auth{
+    margin-top:15px;
+}
+
+.switch1-auth a{
+    text-decoration:none;
+    color:black;
+    font-weight:bold;
+}
+
+#error-msg{
+    margin-top:10px;
+    font-size:14px;
+}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+
+    .auth-left{
+        display:none;
+    }
+
+    .auth-right{
+        width:100%;
+    }
+
+}
+
+</style>
+</head>
+
+<body class="auth-page">
+
+<div class="auth-wrapper">
+
+    <!-- LEFT SIDE -->
+    <div class="auth-left">
+        <img src="assets/login.png" alt="Login Image">
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="auth-right">
+
+        <div class="login-container">
+
+            <h1>Welcome to iStore</h1>
+
+            <form id="loginForm">
+
+                <input 
+                    type="text" 
+                    name="username"
+                    placeholder="Username" 
+                    id="username" 
+                    required
+                >
+
+                <!-- PASSWORD WITH EYE -->
+                <div class="password-wrapper">
+
+                    <input 
+                        type="password" 
+                        name="password"
+                        placeholder="Password" 
+                        id="password" 
+                        required
+                    >
+
+                    <span class="eye-icon" id="togglePassword">👁</span>
+
+                </div>
+
+                <button type="submit">Login</button>
+
+            </form>
+
+            <!-- Register Section -->
+            <p class="switch1-auth">
+                Don't have an account?
+                <a href="register.html">Register</a>
+            </p>
+
+            <p id="error-msg"></p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* PASSWORD TOGGLE */
+
+const togglePassword = document.getElementById("togglePassword");
+const passwordInput = document.getElementById("password");
+
+togglePassword.addEventListener("click", function(){
+
+    const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+    passwordInput.setAttribute("type", type);
+
+});
+
+
+document.getElementById("loginForm").addEventListener("submit", function(e){
+
+    e.preventDefault();
+
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    const msg = document.getElementById("error-msg");
+
+    if(username === "" || password === ""){
+        msg.style.color = "red";
+        msg.textContent = "Please fill all fields.";
+        return;
+    }
+
+    const formData = new FormData();
+
+    formData.append("username", username);
+    formData.append("password", password);
+
+
+    fetch("login.php", {
+
+        method: "POST",
+        body: formData
+
+    })
+    .then(response => response.text())
+    .then(data => {
+
+        if(data === "success"){
+
+            msg.style.color = "green";
+            msg.textContent = "Login successful! Redirecting...";
+
+            setTimeout(function(){
+
+                window.location.href = "store.php";
+
+            }, 1000);
+
+        }else{
+
+            msg.style.color = "red";
+            msg.textContent = data;
+
+        }
+
+    })
+    .catch(error => {
+
+        msg.style.color = "red";
+        msg.textContent = "Server error.";
+
+    });
+
+});
+
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>iStore Register</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+/* PAGE LAYOUT */
+.auth-wrapper{
+    display:flex;
+    height:100vh;
+    width:100%;
+    font-family: Arial, sans-serif;
+}
+
+/* LEFT SIDE */
+.auth-left{
+    width:50%;
+    background:black;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.auth-left img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
+
+/* RIGHT SIDE */
+.auth-right{
+    width:50%;
+    background:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* REGISTER BOX */
+.login-container{
+    width:350px;
+    text-align:center;
+}
+
+.login-container h1{
+    margin-bottom:20px;
+}
+
+/* INPUTS */
+.login-container input{
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:14px;
+}
+
+/* PASSWORD WRAPPER */
+.password-wrapper{
+    position:relative;
+}
+
+/* EYE ICON */
+.eye-icon{
+    position:absolute;
+    right:12px;
+    top:50%;
+    transform:translateY(-50%);
+    cursor:pointer;
+    font-size:16px;
+    color:#777;
+}
+
+/* BUTTON */
+.login-container button{
+    width:100%;
+    padding:12px;
+    background:black;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+.login-container button:hover{
+    background:#333;
+}
+
+.switch-auth{
+    margin-top:15px;
+}
+
+.switch-auth a{
+    text-decoration:none;
+    color:black;
+    font-weight:bold;
+}
+
+#register-msg{
+    margin-top:10px;
+    font-size:14px;
+    font-weight:bold;
+}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+
+    .auth-left{
+        display:none;
+    }
+
+    .auth-right{
+        width:100%;
+    }
+
+}
+
+</style>
+</head>
+
+<body class="auth-page">
+
+<div class="auth-wrapper">
+
+    <!-- LEFT SIDE -->
+    <div class="auth-left">
+        <img src="assets/login.png" alt="Register Image">
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="auth-right">
+
+        <div class="login-container">
+
+            <h1>Create Account</h1>
+
+            <form id="registerForm">
+
+                <input 
+                    type="text" 
+                    placeholder="Username" 
+                    name="username"
+                    id="newUsername" 
+                    required
+                >
+
+                <!-- PASSWORD -->
+                <div class="password-wrapper">
+
+                    <input 
+                        type="password" 
+                        placeholder="Password" 
+                        name="password"
+                        id="newPassword" 
+                        required
+                    >
+
+                    <span class="eye-icon" id="togglePassword1">👁</span>
+
+                </div>
+
+                <!-- CONFIRM PASSWORD -->
+                <div class="password-wrapper">
+
+                    <input 
+                        type="password" 
+                        placeholder="Confirm Password" 
+                        name="confirmPassword"
+                        id="confirmPassword" 
+                        required
+                    >
+
+                    <span class="eye-icon" id="togglePassword2">👁</span>
+
+                </div>
+
+                <button type="submit">Register</button>
+
+            </form>
+
+            <p class="switch-auth">
+                Already have an account? 
+                <a href="login.html">Login</a>
+            </p>
+
+            <p id="register-msg"></p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* PASSWORD TOGGLE 1 */
+
+const togglePassword1 = document.getElementById("togglePassword1");
+const password1 = document.getElementById("newPassword");
+
+togglePassword1.addEventListener("click", function(){
+
+    const type = password1.getAttribute("type") === "password" ? "text" : "password";
+    password1.setAttribute("type", type);
+
+});
+
+
+/* PASSWORD TOGGLE 2 */
+
+const togglePassword2 = document.getElementById("togglePassword2");
+const password2 = document.getElementById("confirmPassword");
+
+togglePassword2.addEventListener("click", function(){
+
+    const type = password2.getAttribute("type") === "password" ? "text" : "password";
+    password2.setAttribute("type", type);
+
+});
+
+
+document.getElementById("registerForm").addEventListener("submit", function(e){
+
+    e.preventDefault();
+
+    const username = document.getElementById("newUsername").value.trim();
+    const password = document.getElementById("newPassword").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+
+    const msg = document.getElementById("register-msg");
+
+    /* FRONTEND VALIDATION */
+
+    if(username === "" || password === "" || confirmPassword === ""){
+        msg.style.color = "red";
+        msg.textContent = "Please fill all fields.";
+        return;
+    }
+
+    if(password !== confirmPassword){
+        msg.style.color = "red";
+        msg.textContent = "Passwords do not match.";
+        return;
+    }
+
+    /* SEND DATA TO register.php */
+
+    const formData = new FormData();
+    formData.append("username", username);
+    formData.append("password", password);
+    formData.append("confirmPassword", confirmPassword);
+
+
+    fetch("register.php", {
+
+        method: "POST",
+        body: formData
+
+    })
+    .then(response => response.text())
+    .then(data => {
+
+     if(data === "success"){
+
+    msg.style.color = "green";
+    msg.textContent = "Account created successfully! Redirecting...";
+
+    setTimeout(function(){
+
+        window.location.href = "store.php";
+
+    }, 1500);
+
+}
+else{
+
+            msg.style.color = "red";
+            msg.textContent = data;
+
+        }
+
+    })
+    .catch(error => {
+
+        msg.style.color = "red";
+        msg.textContent = "Server error. Please try again.";
+
+    });
+
+});
+
+</script>
+
+
+</body>
+</html>
