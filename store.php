@@ -119,31 +119,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <div class="product" data-category="phones">
             <img src="assets/iphone14pro.png" alt="iPhone 14 Pro" />
             <h3>iPhone 14 Pro</h3>
-            <p>$999</p>
+            <p>₱ 30,999</p>
          <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="phones">
             <img src="assets/iphone14.png" alt="iPhone 14" />
             <h3>iPhone 14</h3>
-            <p>$799</p>
+            <p>₱ 27,199</p>
             <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="phones">
             <img src="assets/iphonese.png" alt="iPhone SE" />
             <h3>iPhone SE</h3>
-            <p>$429</p>
+            <p>₱ 14,,829</p>
            <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="phones">
             <img src="assets/iphone17pro.png" alt="iPhone 17 Pro" />
             <h3>iPhone 17 Pro</h3>
-            <p>$1199</p>
+            <p>₱ 51,199</p>
             <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="phones">
             <img src="assets/iphone16.png" alt="iPhone 16" />
             <h3>iPhone 16</h3>
-            <p>$1090</p>
+            <p>₱ 43,090</p>
           <button type="button" class="view-item-btn">View Item</button>
         </div>
 
@@ -151,31 +151,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <div class="product" data-category="ipads">
             <img src="assets/ipadpro12.png" alt="iPad Pro 12.9" />
             <h3>iPad Pro</h3>
-            <p>$1099</p>
+            <p>₱ 30,099</p>
            <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="ipads">
             <img src="assets/ipadair.png" alt="iPad Air" />
             <h3>iPad Air</h3>
-            <p>$799</p>
+            <p>₱ 27,999</p>
             <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="ipads">
             <img src="assets/ipadairpurple.png" alt="iPad Mini" />
             <h3>iPad Mini</h3>
-            <p>$549</p>
+            <p>₱ 15,149</p>
            <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="ipads">
             <img src="assets/ipadmini.png" alt="iPad Mini" />
             <h3>iPad Mini</h3>
-            <p>$560</p>
+            <p>₱ 15,260</p>
             <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="ipads">
             <img src="assets/ipadpro11.png" alt="iPad" />
             <h3>iPad</h3>
-            <p>$499</p>
+            <p>₱ 10,499</p>
             <button type="button" class="view-item-btn">View Item</button>
         </div>
 
@@ -183,31 +183,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <div class="product" data-category="macs">
             <img src="assets/macbookair.png" alt="MacBook Air" />
             <h3>MacBook Air</h3>
-            <p>$999</p>
+            <p>₱ 29,999</p>
           <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="macs">
             <img src="assets/macbookpro.png" alt="MacBook Pro" />
             <h3>MacBook Pro</h3>
-            <p>$1010</p>
+            <p>₱ 21,010</p>
             <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="macs">
             <img src="assets/macbookpro14.png" alt="MacBook Pro 14" />
             <h3>MacBook Pro 14</h3>
-            <p>$1999</p>
+            <p>₱ 31,999</p>
            <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="macs">
             <img src="assets/macbookairm4.png" alt="Macbook Air M4" />
             <h3>Macbook Air M4</h3>
-            <p>$1050</p>
+            <p>₱ 33,050</p>
             <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="macs">
             <img src="assets/imac24.png" alt="iMac 24" />
             <h3>iMac 24</h3>
-            <p>$1299</p>
+            <p>₱ 27,299</p>
             <button type="button" class="view-item-btn">View Item</button>
         </div>
 
@@ -215,31 +215,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <div class="product" data-category="watches">
             <img src="assets/applewatch8.png" alt="Apple Watch Series 8" />
             <h3>Apple Watch Series 8</h3>
-            <p>$399</p>
+            <p>₱ 2,399</p>
             <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="watches">
             <img src="assets/applewatchultra.png" alt="Apple Watch Ultra" />
             <h3>Apple Watch Ultra</h3>
-            <p>$799</p>
+            <p>₱ 3,799</p>
          <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="watches">
             <img src="assets/applewatch10.png" alt="Apple Watch 10" />
             <h3>Apple Watch 10</h3>
-            <p>$599</p>
+            <p>₱ 3,599</p>
           <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="watches">
             <img src="assets/applewatchair.png" alt="Apple Watch Air" />
             <h3>Apple Watch Air</h3>
-            <p>$599</p>
+            <p>₱ 4,599</p>
           <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="watches">
-            <img src="assets/applewatchh.png" alt="Apple Watch H" />
-            <h3>Apple Watch H</h3>
-            <p>$562</p>
+            <img src="assets/applewatchh.png" alt="Apple Watch " />
+            <h3>Apple Watch </h3>
+            <p>₱ 3,562</p>
            <button type="button" class="view-item-btn">View Item</button>
         </div>
 
@@ -247,31 +247,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <div class="product" data-category="accessories">
             <img src="assets/airpodspro.png" alt="AirPods Pro" />
             <h3>AirPods Pro</h3>
-            <p>$249</p>
+            <p>₱ 2,249</p>
           <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="accessories">
             <img src="assets/magicmouse.png" alt="Magic Mouse" />
             <h3>Magic Mouse</h3>
-            <p>$99</p>
+            <p>₱ 999</p>
            <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="accessories">
             <img src="assets/magickeyboard.png" alt="Magic Keyboard" />
             <h3>Magic Keyboard</h3>
-            <p>$149</p>
+            <p>₱ 849</p>
             <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="accessories">
             <img src="assets/applepencil.png" alt="Apple Pencil 2nd Gen" />
             <h3>Apple Pencil 2nd Gen</h3>
-            <p>$129</p>
+            <p>₱ 1,129</p>
            <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="accessories">
             <img src="assets/airpodsmax.png" alt="AirPods Max" />
             <h3>AirPods Max</h3>
-            <p>$487</p>
+            <p>₱ 1,487</p>
             <button type="button" class="view-item-btn">View Item</button>
         </div>
     </div>
