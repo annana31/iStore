@@ -5,7 +5,58 @@ if (!isset($_SESSION["admin_id"]) || $_SESSION["role"] !== "admin") {
     header("Location: adminLOGIN.html");
     exit();
 }
+
+/* DATABASE CONNECTION */
+$conn = new mysqli("localhost", "root", "", "store_db");
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+/* ADD PRODUCT */
+if(isset($_POST['add_product'])){
+
+    $name = $_POST['name'];
+    $price = $_POST['price'];
+    $category = $_POST['category'];
+
+    $imagePath = "";
+
+    if(!empty($_FILES['image']['name'])){
+    $imageName = time() . "_" . $_FILES['image']['name'];
+    $tmpName = $_FILES['image']['tmp_name'];
+
+    $uploadDir = "assets/uploads/";
+    $imagePath = $uploadDir . $imageName;
+
+    move_uploaded_file($tmpName, $imagePath);
+
+    $stmt = $conn->prepare("INSERT INTO admin_products (name, price, category, image) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("sdss", $name, $price, $category, $imagePath);
+    $stmt->execute();
+    }
+}
+
+/* DELETE PRODUCT */
+if(isset($_POST['delete_id'])){
+
+    $id = $_POST['delete_id'];
+
+    $stmt = $conn->prepare("DELETE FROM admin_products WHERE id=?");
+    $stmt->bind_param("i",$id);
+    $stmt->execute();
+}
+
+/* FETCH ALL PRODUCTS */
+$products = [];
+$result = $conn->query("SELECT * FROM admin_products ORDER BY id DESC"); // newest first
+if ($result->num_rows > 0) {
+    while($row = $result->fetch_assoc()){
+        $products[] = $row;
+    }
+}
 ?>
+
 
 
 <!DOCTYPE html>
@@ -363,19 +414,19 @@ a {
     <!-- ADD PRODUCT -->
     <div class="add-product">
         <h2>Add New Product</h2>
-        <form id="add-form">
+        <form method="POST" enctype="multipart/form-data">
             <div class="form-grid">
                 <div class="form-group">
                     <label>Product Name</label>
-                    <input type="text" id="add-name" required>
+                  <input type="text" name="name" id="add-name" required>
                 </div>
                 <div class="form-group">
-                    <label>Price ($)</label>
-                    <input type="number" id="add-price" required>
+                    <label>Price (₱)</label>
+                    <input type="number" name="price" id="add-price" required>
                 </div>
                 <div class="form-group">
                     <label>Category</label>
-                    <select id="add-category">
+                    <select name="category" id="add-category">
                         <option>Phones</option>
                         <option>iPads</option>
                         <option>Macs</option>
@@ -385,10 +436,10 @@ a {
                 </div>
                 <div class="form-group">
                     <label>Product Image</label>
-                    <input type="file" id="add-image" accept="image/*">
+                    <input type="file" name="image" id="add-image" accept="image/*">
                 </div>
             </div>
-            <button type="submit" class="add-btn">Add Product</button>
+            <button type="submit" name="add_product" class="add-btn">Add Product</button>
         </form>
     </div>
 
@@ -397,46 +448,33 @@ a {
         <div class="products-title">All Products</div>
         <div class="products-grid" id="products-grid">
 
+<?php
+$result = $conn->query("SELECT * FROM admin_products");
 
-            <!-- PHONES -->
-            <div class="product-card" data-category="Phones"><img src="assets/iphone14pro.png"><h3>iPhone 14 Pro</h3><p>$999</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="Phones"><img src="assets/iphone14.png"><h3>iPhone 14</h3><p>$799</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="Phones"><img src="assets/iphonese.png"><h3>iPhone SE</h3><p>$429</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="Phones"><img src="assets/iphone17pro.png"><h3>iPhone 17 Pro</h3><p>$1199</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="Phones"><img src="assets/iphone16.png"><h3>iPhone 16</h3><p>$1090</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
+while($row = $result->fetch_assoc()){
+?>
 
-            <!-- IPADS -->
-            <div class="product-card" data-category="iPads"><img src="assets/ipadpro12.png"><h3>iPad Pro</h3><p>$1099</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="iPads"><img src="assets/ipadair.png"><h3>iPad Air</h3><p>$799</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="iPads"><img src="assets/ipadairpurple.png"><h3>iPad Mini</h3><p>$549</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="iPads"><img src="assets/ipadmini.png"><h3>iPad Mini</h3><p>$560</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="iPads"><img src="assets/ipadpro11.png"><h3>iPad</h3><p>$499</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
+<div class="product-card">
 
-            <!-- MACS -->
-            <div class="product-card" data-category="Macs"><img src="assets/macbookair.png"><h3>MacBook Air</h3><p>$999</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="Macs"><img src="assets/macbookpro.png"><h3>MacBook Pro</h3><p>$1010</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="Macs"><img src="assets/macbookpro14.png"><h3>MacBook Pro 14</h3><p>$1999</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="Macs"><img src="assets/macbookairm4.png"><h3>Macbook Air M4</h3><p>$1050</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="Macs"><img src="assets/imac24.png"><h3>iMac 24</h3><p>$1299</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
+<img src="<?php echo htmlspecialchars($row['image']); ?>" alt="Product Image">
 
-            <!-- WATCHES -->
-            <div class="product-card" data-category="Watches"><img src="assets/applewatch8.png"><h3>Apple Watch Series 8</h3><p>$399</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="Watches"><img src="assets/applewatchultra.png"><h3>Apple Watch Ultra</h3><p>$799</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="Watches"><img src="assets/applewatch10.png"><h3>Apple Watch 10</h3><p>$599</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="Watches"><img src="assets/applewatchair.png"><h3>Apple Watch Air</h3><p>$599</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="Watches"><img src="assets/applewatchh.png"><h3>Apple Watch H</h3><p>$562</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
+<h3><?php echo $row['name']; ?></h3>
 
-            <!-- ACCESSORIES -->
-            <div class="product-card" data-category="Accessories"><img src="assets/airpodspro.png"><h3>AirPods Pro</h3><p>$249</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="Accessories"><img src="assets/magicmouse.png"><h3>Magic Mouse</h3><p>$99</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="Accessories"><img src="assets/magickeyboard.png"><h3>Magic Keyboard</h3><p>$149</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="Accessories"><img src="assets/applepencil.png"><h3>Apple Pencil 2nd Gen</h3><p>$129</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
-            <div class="product-card" data-category="Accessories"><img src="assets/airpodsmax.png"><h3>AirPods Max</h3><p>$487</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div></div>
+<p>₱<?php echo number_format($row['price']); ?></p>
 
-        </div>
-    </div>
+<form method="POST">
+<input type="hidden" name="delete_id" value="<?php echo $row['id']; ?>">
+<button type="submit">Delete</button>
+</form>
 
 </div>
+
+<?php } ?>
+
+</div>
+</div>
+
+
 
 <!-- EDIT MODAL -->
 <div class="modal-overlay" id="edit-modal-overlay">
@@ -497,42 +535,7 @@ function showNotification(message){
     setTimeout(()=>{notification.style.display='none';},2000);
 }
 
-// ======================
-// ADD PRODUCT FUNCTIONALITY
-// ======================
-const addForm = document.getElementById('add-form');
-const productsGrid = document.getElementById('products-grid');
-addForm.addEventListener('submit', e=>{
-    e.preventDefault();
-    const name = document.getElementById('add-name').value;
-    const price = parseFloat(document.getElementById('add-price').value).toFixed(2);
-    const category = document.getElementById('add-category').value;
-    const imageFile = document.getElementById('add-image').files[0];
 
-    const card = document.createElement('div');
-    card.classList.add('product-card');
-    card.setAttribute('data-category', category);
-
-    const img = document.createElement('img');
-    if(imageFile){
-        const reader = new FileReader();
-        reader.onload = function(ev){ img.src = ev.target.result; }
-        reader.readAsDataURL(imageFile);
-    } else { img.src = 'assets/default.png'; }
-
-    card.appendChild(img);
-    card.innerHTML += `<h3>${name}</h3><p>$${price}</p><div class="actions"><button class="edit-btn">Edit</button><button class="delete-btn">Delete</button></div>`;
-    productsGrid.appendChild(card);
-
-    // Reset form
-    addForm.reset();
-
-    // Show notification
-    showNotification('Product Added Successfully!');
-
-    // Re-bind edit and delete events for new product
-    bindEditDelete(card);
-});
 
 // ======================
 // BIND EDIT & DELETE TO NEW PRODUCTS
@@ -545,7 +548,7 @@ function bindEditDelete(card){
         productToEdit = card;
         editName.value = card.querySelector('h3').innerText;
         editCategory.value = card.getAttribute('data-category');
-        editPrice.value = parseFloat(card.querySelector('p').innerText.replace('$',''));
+        editPrice.value = parseFloat(card.querySelector('p').innerText.replace('₱',''));
         editImageFile.value='';
         editModalOverlay.style.display='flex';
     });
@@ -572,7 +575,7 @@ editForm.addEventListener('submit', e=>{
     if(!productToEdit) return;
     productToEdit.querySelector('h3').innerText = editName.value;
     productToEdit.setAttribute('data-category', editCategory.value);
-    productToEdit.querySelector('p').innerText = `$${parseFloat(editPrice.value).toFixed(2)}`;
+    productToEdit.querySelector('p').innerText = `₱${parseFloat(editPrice.value).toFixed(2)}`;
     if(editImageFile.files && editImageFile.files[0]){
         const reader = new FileReader();
         reader.onload = function(ev){ productToEdit.querySelector('img').src = ev.target.result; }

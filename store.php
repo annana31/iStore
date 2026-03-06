@@ -32,6 +32,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
     exit;
 }
+
+/* FETCH ALL PRODUCTS FOR STORE */
+$store_products = [];
+$result = $conn->query("SELECT * FROM admin_products ORDER BY id DESC"); // newest first
+if ($result->num_rows > 0) {
+    while($row = $result->fetch_assoc()){
+        $store_products[] = $row;
+    }
+}
+
+
 ?>
 
 
@@ -275,6 +286,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             <button type="button" class="view-item-btn">View Item</button>
         </div>
     </div>
+
+    <div class="products" id="product-list">
+    <!-- ADMIN PRODUCTS -->
+    <?php if(!empty($store_products)): ?>
+    <?php foreach($store_products as $product): ?>
+        <div class="product" data-category="<?= htmlspecialchars($product['category']) ?>">
+            <img src="<?= htmlspecialchars($product['image']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" />
+            <h3><?= htmlspecialchars($product['name']) ?></h3>
+            <p>₱<?= number_format($product['price'], 2) ?></p>
+            <button type="button" class="view-item-btn"
+                data-id="<?= $product['id'] ?>"
+                data-name="<?= htmlspecialchars($product['name']) ?>"
+                data-price="<?= number_format($product['price'],2) ?>"
+                data-image="<?= htmlspecialchars($product['image']) ?>"
+                data-category="<?= htmlspecialchars($product['category']) ?>"
+            >
+                View Item
+            </button>
+        </div>
+    <?php endforeach; ?>
+<?php endif; ?>
+</div> <!-- end of #product-list -->
+
 </main>
 
 <!-- Notification container -->

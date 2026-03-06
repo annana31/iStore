@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const products = document.querySelectorAll(".product");
+  function getAllProducts() {
+  return document.querySelectorAll(".product");
+}
   const searchInput = document.querySelector("input[type='search']");
   const cartCount = document.querySelector(".count");
   const cartIcon = document.querySelector(".cart");
@@ -8,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const navItems = document.querySelectorAll("nav ul li");
   const cartItemsContainer = document.getElementById("cart-items");
   const checkoutButtons = document.querySelectorAll(".checkout-btn");
-
+  
 
 // =========================
 // PRICE FORMATTER
@@ -67,52 +69,49 @@ const deviceColors = {
 
 
 // =========================
-// OPEN PANEL
+// OPEN PANEL - DELEGATED
 // =========================
-document.querySelectorAll(".view-item-btn").forEach(button=>{
-  button.addEventListener("click",e=>{
-    e.preventDefault();
-    e.stopPropagation();
+document.body.addEventListener("click", e => {
+  const button = e.target.closest(".view-item-btn");
+  if (!button) return;
 
-    const product = button.closest(".product");
-    if(!product) return;
+  e.preventDefault();
+  e.stopPropagation();
 
-    const category = product.dataset.category;
+  const product = button.closest(".product");
+  if (!product) return;
 
-    colorSelect.parentElement.style.display="none";
-    storageSelect.parentElement.style.display="none";
+  const category = product.dataset.category;
 
-    if(category==="phones" || category==="ipads" || category==="macs"){
-      colorSelect.parentElement.style.display="block";
-      storageSelect.parentElement.style.display="block";
+  colorSelect.parentElement.style.display = "none";
+  storageSelect.parentElement.style.display = "none";
 
-      colorSelect.innerHTML = deviceColors[category].map(c=>`<option>${c}</option>`).join("");
+  if (category === "phones" || category === "ipads" || category === "macs") {
+    colorSelect.parentElement.style.display = "block";
+    storageSelect.parentElement.style.display = "block";
 
-      storageSelect.innerHTML=`
+    colorSelect.innerHTML = deviceColors[category].map(c => `<option>${c}</option>`).join("");
+    storageSelect.innerHTML = `
       <option>128GB</option>
       <option>256GB</option>
       <option>512GB</option>
       <option>1TB</option>`;
-
-      storageSelect.value="128GB";
-    }
-
-    else if(category==="watches"){
-      storageSelect.parentElement.style.display="block";
-      storageSelect.innerHTML=`
+    storageSelect.value = "128GB";
+  } else if (category === "watches") {
+    storageSelect.parentElement.style.display = "block";
+    storageSelect.innerHTML = `
       <option>128GB</option>
       <option>256GB</option>`;
-      storageSelect.value="128GB";
-    }
+    storageSelect.value = "128GB";
+  }
 
-    panelImage.src = product.querySelector("img")?.src || "";
-    panelName.innerText = product.querySelector("h3")?.innerText || "";
-    panelPrice.innerText = product.querySelector("p")?.innerText || "";
-    quantityInput.value = 1;
+  panelImage.src = product.querySelector("img")?.src || "";
+  panelName.innerText = product.querySelector("h3")?.innerText || "";
+  panelPrice.innerText = product.querySelector("p")?.innerText || "";
+  quantityInput.value = 1;
 
-    panel.classList.add("active");
-    document.body.classList.add("panel-open");
-  });
+  panel.classList.add("active");
+  document.body.classList.add("panel-open");
 });
 
 
@@ -265,36 +264,35 @@ window.location.href="cart.html";
 // =========================
 // SEARCH
 // =========================
-if(searchInput){
-searchInput.addEventListener("input",()=>{
-const searchValue=searchInput.value.toLowerCase();
+if (searchInput) {
+  searchInput.addEventListener("input", () => {
+    const searchValue = searchInput.value.toLowerCase();
 
-products.forEach(product=>{
-const name=product.querySelector("h3").textContent.toLowerCase();
-product.style.display = name.includes(searchValue)?"block":"none";
-});
-});
+    getAllProducts().forEach(product => {
+      const name = product.querySelector("h3").textContent.toLowerCase();
+      product.style.display = name.includes(searchValue) ? "block" : "none";
+    });
+  });
 }
 
 
 // =========================
-// CATEGORY FILTER
+// CATEGORY FILTER (UPDATED)
 // =========================
 navItems.forEach(item=>{
-item.addEventListener("click",()=>{
+  item.addEventListener("click",()=>{
+    navItems.forEach(i=>i.classList.remove("active"));
+    item.classList.add("active");
 
-navItems.forEach(i=>i.classList.remove("active"));
-item.classList.add("active");
+    const category = item.dataset.category;
 
-const category=item.dataset.category;
-
-products.forEach(product=>{
-product.style.display =
-category==="all" || product.dataset.category===category
-?"block":"none";
+    getAllProducts().forEach(product => {
+  product.style.display =
+    category === "all" || product.dataset.category === category
+      ? "block"
+      : "none";
 });
-
-});
+  });
 });
 
 
@@ -347,4 +345,10 @@ notif.classList.remove("show");
 
 }
 
-});
+// =========================
+// SHOW ALL PRODUCTS ON PAGE LOAD
+// =========================
+const allCategory = document.querySelector("nav ul li[data-category='all']");
+if(allCategory) allCategory.click();
+
+}); // end of DOMContentLoaded
