@@ -316,9 +316,9 @@ document.addEventListener('click', (event) => {
 });
 
 // NAVBAR LINKS
-document.querySelector('.nav-left a:nth-child(1)').addEventListener('click', () => { window.location.href = 'adminORDERS.html'; });
-document.querySelector('.nav-left a:nth-child(2)').addEventListener('click', () => { window.location.href = 'adminPRODUCTS.html'; });
-document.querySelector('.nav-left a:nth-child(3)').addEventListener('click', () => { window.location.href = 'adminUSERS.html'; });
+document.querySelector('.nav-left a:nth-child(1)').addEventListener('click', () => { window.location.href = 'adminORDERS.php'; });
+document.querySelector('.nav-left a:nth-child(2)').addEventListener('click', () => { window.location.href = 'adminPRODUCTS.php'; });
+document.querySelector('.nav-left a:nth-child(3)').addEventListener('click', () => { window.location.href = 'adminUSERS.php'; });
 
 // LOGOUT
 logoutBtn.addEventListener('click', () => { window.location.href = 'index.html'; });
