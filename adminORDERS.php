@@ -20,6 +20,7 @@ if ($conn->connect_error) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin - Orders</title>
 <style>
+
 /* ====================== GLOBAL ====================== */
 body {
     margin: 0;
@@ -71,7 +72,28 @@ a { text-decoration: none; color: inherit; }
 .container { padding: 40px; max-width: 1400px; margin: auto; }
 
 /* ====================== ORDERS SECTION ====================== */
-orders .orders-title { font-size: 22px; font-weight: 600; margin-bottom: 25px; }
+orders .orders-title { font-size: 22px; font-weight: 600; margin-bottom: 10px; }
+
+/* FILTER */
+.orders-filter{
+    margin-bottom:20px;
+    font-size:15px;
+    display:flex;
+    gap:20px;
+}
+.orders-filter span{
+    cursor:pointer;
+    font-weight:600;
+    color:#555;
+}
+.orders-filter span:hover{
+    color:#000;
+}
+.orders-filter span.active{
+    color:#000;
+    text-decoration:underline;
+}
+
 orders .orders-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -168,11 +190,11 @@ orders .remove-btn:hover { background: #b3b3b3; }
 #remove-modal .modal-content .yes-btn:hover { background: #363636; }
 #remove-modal .modal-content .cancel-btn { background: #ccc; color: #111; }
 #remove-modal .modal-content .cancel-btn:hover { background: #b3b3b3; }
+
 </style>
 </head>
 <body>
 
-<!-- NAVBAR -->
 <div class="navbar">
     <div class="nav-left">
         <a href="adminORDERS.php">Orders</a>
@@ -189,138 +211,222 @@ orders .remove-btn:hover { background: #b3b3b3; }
 <div class="container">
     <orders>
         <div class="orders-title">Orders</div>
-        <div class="orders-grid">
-        <?php
-        $sql = "SELECT * FROM cart_items ORDER BY added_at DESC";
-        $result = $conn->query($sql);
 
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-        ?>
-        <div class="order-card" id="order-<?= $row['id']; ?>">
-            <div class="order-details">
-                <div class="product-name"><?= htmlspecialchars($row['product_name']); ?></div>
-                <div class="quantity">Price: ₱<?= number_format($row['product_price'],2); ?></div>
-                <div class="quantity">Quantity: <?= $row['quantity']; ?></div>
-                <div class="quantity">User: <?= htmlspecialchars($row['username']); ?></div>
-                <div class="quantity">Ordered at: <?= $row['added_at']; ?></div>
-                <div class="quantity">
-                    Status:
-                    <strong class="status" style="color: <?= ($row['status']=='Confirmed')?'green':'orange'; ?>;">
-                        <?= $row['status']; ?>
-                    </strong>
-                </div>
-            </div>
-            <div class="order-actions">
-                <?php if($row['status']=='Pending'): ?>
-                <button class="confirm-btn" data-id="<?= $row['id']; ?>">Confirm</button>
-                <button class="remove-btn" data-id="<?= $row['id']; ?>">Remove</button>
-                <?php else: ?>
-                Confirmed
-                <?php endif; ?>
-            </div>
+        <!-- FILTER -->
+        <div class="orders-filter">
+            <span id="show-all" class="active">All</span>
+            <span id="show-pending">Pending</span>
+            <span id="show-confirmed">Confirmed</span>
         </div>
-        <?php
-            }
-        } else {
-            echo "<p>No orders found.</p>";
-        }
-        ?>
-        </div>
-    </orders>
+
+        <div class="orders-grid">
+
+<?php
+$sql = "SELECT * FROM cart_items ORDER BY added_at DESC";
+$result = $conn->query($sql);
+
+if ($result->num_rows > 0) {
+while ($row = $result->fetch_assoc()) {
+?>
+
+<div class="order-card" data-status="<?= $row['status']; ?>" id="order-<?= $row['id']; ?>">
+<div class="order-details">
+<div class="product-name"><?= htmlspecialchars($row['product_name']); ?></div>
+<div class="quantity">Price: ₱<?= number_format($row['product_price'],2); ?></div>
+<div class="quantity">Quantity: <?= $row['quantity']; ?></div>
+<div class="quantity">User: <?= htmlspecialchars($row['username']); ?></div>
+<div class="quantity">Ordered at: <?= $row['added_at']; ?></div>
+<div class="quantity">
+Status:
+<strong class="status" style="color: <?= ($row['status']=='Confirmed')?'green':'orange'; ?>;">
+<?= $row['status']; ?>
+</strong>
+</div>
 </div>
 
-<!-- Toast -->
+<div class="order-actions">
+<?php if($row['status']=='Pending'): ?>
+<button class="confirm-btn" data-id="<?= $row['id']; ?>">Confirm</button>
+<button class="remove-btn" data-id="<?= $row['id']; ?>">Remove</button>
+<?php else: ?>
+Confirmed
+<?php endif; ?>
+</div>
+</div>
+
+<?php
+}
+} else {
+echo "<p>No orders found.</p>";
+}
+?>
+
+</div>
+</orders>
+</div>
+
 <div id="toast"></div>
 
-<!-- Remove Modal -->
 <div id="remove-modal">
-    <div class="modal-content">
-        <p>Are you sure you want to remove this order?</p>
-        <button class="yes-btn">Yes</button>
-        <button class="cancel-btn">Cancel</button>
-    </div>
+<div class="modal-content">
+<p>Are you sure you want to remove this order?</p>
+<button class="yes-btn">Yes</button>
+<button class="cancel-btn">Cancel</button>
+</div>
 </div>
 
-<!-- JS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
+
 // Account dropdown
 const accountBtn = document.getElementById('account-btn');
 const accountDropdown = document.getElementById('account-dropdown');
 const logoutBtn = document.getElementById('logout-btn');
+
 accountBtn.addEventListener('click', () => {
-    accountDropdown.style.display = accountDropdown.style.display==='block'?'none':'block';
+accountDropdown.style.display =
+accountDropdown.style.display==='block'?'none':'block';
 });
+
 document.addEventListener('click', e => {
-    if(!accountBtn.contains(e.target)) accountDropdown.style.display='none';
+if(!accountBtn.contains(e.target)) accountDropdown.style.display='none';
 });
-logoutBtn.addEventListener('click', () => { window.location.href='admin_logout.php'; });
+
+logoutBtn.addEventListener('click', () => {
+window.location.href='admin_logout.php';
+});
 
 // Toast
 const toast = document.getElementById('toast');
-function showToast(msg){ toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2000); }
+function showToast(msg){
+toast.textContent=msg;
+toast.classList.add('show');
+setTimeout(()=>toast.classList.remove('show'),2000);
+}
 
-// Confirm order via AJAX
+// Confirm order
 $(document).ready(function(){
-    $('.confirm-btn').click(function(){
-        var orderId = $(this).data('id');
-        var button = $(this);
-        var statusEl = $('#order-'+orderId+' strong.status');
-        $.ajax({
-            url: 'confirm_order.php',
-            method: 'POST',
-            data: { id: orderId },
-            success: function(resp){
-                if(resp.trim()=='success'){
-                    statusEl.text('Confirmed').css('color','green');
-                    button.replaceWith('Confirmed');
-                    showToast('Order Confirmed');
-                } else { alert('Failed to confirm order.'); }
-            },
-            error:function(){ alert('Error connecting to server.'); }
-        });
-    });
+$('.confirm-btn').click(function(){
+var orderId = $(this).data('id');
+var button = $(this);
+var statusEl = $('#order-'+orderId+' strong.status');
+
+$.ajax({
+url: 'confirm_order.php',
+method: 'POST',
+data: { id: orderId },
+success: function(resp){
+if(resp.trim()=='success'){
+    statusEl.text('Confirmed').css('color','green');
+
+    // update order card status
+    $('#order-'+orderId).attr('data-status','Confirmed');
+
+    button.replaceWith('Confirmed');
+
+    // if currently viewing Pending, remove the card
+    if($('#show-pending').hasClass('active')){
+        $('#order-'+orderId).hide();
+    }
+
+    showToast('Order Confirmed');
+}else{
+alert('Failed to confirm order.');
+}
+},
+error:function(){
+alert('Error connecting to server.');
+}
+});
+});
 });
 
 // Remove order
 $('.remove-btn').click(function(){
-    currentOrderToRemove = $(this).closest('.order-card')[0];
-    var orderId = $(this).data('id');
-    $('#remove-modal').css('display','flex');
 
-    // Yes button click
-    $('#remove-modal .yes-btn').off('click').on('click', function(){
-        $.ajax({
-            url: 'remove_order.php',
-            method: 'POST',
-            data: { id: orderId },
-            success: function(resp){
-                if(resp.trim() == 'success'){
-                    $(currentOrderToRemove).remove();
-                    showToast('Order Removed');
-                } else {
-                    alert('Failed to remove order.');
-                }
-                $('#remove-modal').hide();
-                currentOrderToRemove = null;
-            },
-            error: function(){
-                alert('Error connecting to server.');
-                $('#remove-modal').hide();
-                currentOrderToRemove = null;
-            }
-        });
-    });
+currentOrderToRemove = $(this).closest('.order-card')[0];
+var orderId = $(this).data('id');
 
-    // Cancel button click
-    $('#remove-modal .cancel-btn').off('click').on('click', function(){
-        $('#remove-modal').hide();
-        currentOrderToRemove = null;
-    });
+$('#remove-modal').css('display','flex');
+
+$('#remove-modal .yes-btn').off('click').on('click', function(){
+
+$.ajax({
+url: 'remove_order.php',
+method: 'POST',
+data: { id: orderId },
+success: function(resp){
+if(resp.trim() == 'success'){
+$(currentOrderToRemove).remove();
+showToast('Order Removed');
+}else{
+alert('Failed to remove order.');
+}
+
+$('#remove-modal').hide();
+currentOrderToRemove = null;
+},
+
+error: function(){
+alert('Error connecting to server.');
+$('#remove-modal').hide();
+currentOrderToRemove = null;
+}
+
+});
+
+});
+
+$('#remove-modal .cancel-btn').off('click').on('click', function(){
+$('#remove-modal').hide();
+currentOrderToRemove = null;
+});
+
 });
 
 
+// ================= FILTER ORDERS =================
+
+function filterOrders(status){
+
+$('.order-card').each(function(){
+
+var orderStatus = $(this).data('status');
+
+if(status === 'all'){
+$(this).show();
+}
+else if(orderStatus === status){
+$(this).show();
+}
+else{
+$(this).hide();
+}
+
+});
+
+}
+
+$('#show-all').click(function(){
+$('.orders-filter span').removeClass('active');
+$(this).addClass('active');
+filterOrders('all');
+});
+
+$('#show-pending').click(function(){
+$('.orders-filter span').removeClass('active');
+$(this).addClass('active');
+filterOrders('Pending');
+});
+
+$('#show-confirmed').click(function(){
+$('.orders-filter span').removeClass('active');
+$(this).addClass('active');
+filterOrders('Confirmed');
+});
+
 </script>
+
 </body>
 </html>
