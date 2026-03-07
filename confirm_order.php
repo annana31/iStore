@@ -1,16 +1,20 @@
 <?php
-include 'config.php'; // your DB connection
+session_start();
+include "config.php"; // your DB connection
 
-if(isset($_POST['id'])){
-    $id = intval($_POST['id']); // sanitize input
+if(!isset($_POST['id'])){
+    exit('error');
+}
 
-    $stmt = $conn->prepare("UPDATE cart_items SET status = 'Confirmed' WHERE id = ?");
-    $stmt->bind_param("i", $id);
+$order_id = intval($_POST['id']);
 
-    if($stmt->execute()){
-        echo 'success';
-    } else {
-        echo 'error';
-    }
+// Update status to Confirmed
+$stmt = $conn->prepare("UPDATE admin_orders SET status='Confirmed' WHERE id=?");
+$stmt->bind_param("i", $order_id);
+
+if($stmt->execute()){
+    echo "success"; // AJAX will handle UI
+}else{
+    echo "error";
 }
 ?>

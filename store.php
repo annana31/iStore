@@ -19,10 +19,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $product_price = $_POST['product_price'] ?? 0;
     $quantity = $_POST['quantity'] ?? 1;
     $username = $_SESSION['username'] ?? 'Guest';
+    $product_image = $_POST['product_image'] ?? null;
 
 
-    $stmt = $conn->prepare("INSERT INTO cart_items (username, product_name, product_price, quantity) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("ssdi", $username, $product_name, $product_price, $quantity);
+
+    $storage = $_POST['storage'] ?? null;
+$color = $_POST['color'] ?? null;
+
+$stmt = $conn->prepare("INSERT INTO cart_items (username, product_name, product_price, quantity, storage, color, product_image, status, added_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', NOW())");
+$stmt->bind_param("ssdisss", $username, $product_name, $product_price, $quantity, $storage, $color, $product_image);
+
 
 
     if ($stmt->execute()) {
@@ -42,6 +48,24 @@ if ($result->num_rows > 0) {
     }
 }
 
+
+// Map admin category to nav category
+function normalizeCategory($cat) {
+    $cat = strtolower(trim($cat)); // lowercase, trim spaces
+    $map = [
+        'iphone' => 'phones',
+        'iphones' => 'phones',
+        'phone' => 'phones',
+        'ipad' => 'ipads',
+        'macbook' => 'macs',
+        'macs' => 'macs',
+        'watch' => 'watches',
+        'apple watch' => 'watches',
+        'accessory' => 'accessories',
+        'accessories' => 'accessories',
+    ];
+    return $map[$cat] ?? $cat; // fallback to original if not in map
+}
 
 ?>
 
@@ -142,7 +166,7 @@ if ($result->num_rows > 0) {
         <div class="product" data-category="phones">
             <img src="assets/iphonese.png" alt="iPhone SE" />
             <h3>iPhone SE</h3>
-            <p>₱ 14,,829</p>
+            <p>₱ 14,829</p>
            <button type="button" class="view-item-btn">View Item</button>
         </div>
         <div class="product" data-category="phones">
@@ -285,31 +309,53 @@ if ($result->num_rows > 0) {
             <p>₱ 1,487</p>
             <button type="button" class="view-item-btn">View Item</button>
         </div>
-    </div>
 
-    <div class="products" id="product-list">
-    <!-- ADMIN PRODUCTS -->
+        <!-- ADMIN PRODUCTS -->
     <?php if(!empty($store_products)): ?>
     <?php foreach($store_products as $product): ?>
-        <div class="product" data-category="<?= htmlspecialchars($product['category']) ?>">
-            <img src="<?= htmlspecialchars($product['image']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" />
-            <h3><?= htmlspecialchars($product['name']) ?></h3>
-            <p>₱<?= number_format($product['price'], 2) ?></p>
-            <button type="button" class="view-item-btn"
-                data-id="<?= $product['id'] ?>"
-                data-name="<?= htmlspecialchars($product['name']) ?>"
-                data-price="<?= number_format($product['price'],2) ?>"
-                data-image="<?= htmlspecialchars($product['image']) ?>"
-                data-category="<?= htmlspecialchars($product['category']) ?>"
-            >
-                View Item
-            </button>
-        </div>
-    <?php endforeach; ?>
+    <?php $category = normalizeCategory($product['category']); ?>
+    <div class="product" data-category="<?= htmlspecialchars($category) ?>">
+        <img src="<?= htmlspecialchars($product['image']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" />
+        <h3><?= htmlspecialchars($product['name']) ?></h3>
+        <p>₱<?= number_format($product['price']) ?></p>
+        <button type="button" class="view-item-btn"
+            data-id="<?= $product['id'] ?>"
+            data-name="<?= htmlspecialchars($product['name']) ?>"
+            data-price="<?= $product['price'] ?>"
+            data-image="<?= htmlspecialchars($product['image']) ?>"
+            data-category="<?= htmlspecialchars($category) ?>"
+        >
+            View Item
+        </button>
+    </div>
+<?php endforeach; ?>
 <?php endif; ?>
+    </div>
 </div> <!-- end of #product-list -->
 
 </main>
+
+<script>
+const navItems = document.querySelectorAll('nav ul li');
+
+navItems.forEach(nav => {
+    nav.addEventListener('click', () => {
+        navItems.forEach(n => n.classList.remove('active'));
+        nav.classList.add('active');
+
+        const category = nav.dataset.category;
+        const products = document.querySelectorAll('#product-list .product'); // re-select every time
+
+        products.forEach(prod => {
+            if (category === 'all' || prod.dataset.category === category) {
+                prod.style.display = 'flex'; // flex to match layout
+            } else {
+                prod.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
 
 <!-- Notification container -->
 <div id="notification-container"></div>
@@ -346,8 +392,12 @@ if ($result->num_rows > 0) {
     </div>
 
     <button class="add-to-cart">Add to Cart</button>
+    
 </div>
+
 <script src="script.js"></script>
+
+
 
 </body>
 </html>

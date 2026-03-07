@@ -8,7 +8,6 @@
 <style>
 
 /* ===== GLOBAL ===== */
-
 body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     background:#f5f5f5;
@@ -17,7 +16,6 @@ body{
 }
 
 /* ===== NAVBAR ===== */
-
 header{
     background:#fff;
     border-bottom:1px solid #e5e5e5;
@@ -71,7 +69,6 @@ header{
 }
 
 /* ===== PAGE TITLE ===== */
-
 h1{
     text-align:center;
     font-size:32px;
@@ -81,7 +78,6 @@ h1{
 }
 
 /* ===== CART TABLE ===== */
-
 .cart-wrapper{
     max-width:1200px;
     margin:auto;
@@ -114,7 +110,6 @@ h1{
 }
 
 /* ===== PRODUCT CELL ===== */
-
 .item-cell{
     display:flex;
     align-items:center;
@@ -128,14 +123,12 @@ h1{
 }
 
 /* ===== PRICE ===== */
-
 .price-cell,
 .total-cell{
     font-weight:600;
 }
 
 /* ===== REMOVE BUTTON ===== */
-
 .remove-btn{
     background:none;
     border:none;
@@ -149,7 +142,6 @@ h1{
 }
 
 /* ===== SUMMARY BOX ===== */
-
 .summary-box{
     margin-top:40px;
     background:#fff;
@@ -172,7 +164,6 @@ h1{
 }
 
 /* ===== CHECKOUT BUTTON ===== */
-
 .checkout-btn{
     width:100%;
     padding:15px;
@@ -189,7 +180,6 @@ h1{
 }
 
 /* ===== EMPTY CART ===== */
-
 .empty-cart{
     text-align:center;
     padding:50px;
@@ -197,9 +187,7 @@ h1{
 }
 
 /* ===== MOBILE ===== */
-
 @media(max-width:768px){
-
 .cart-table th:nth-child(2),
 .cart-table td:nth-child(2),
 .cart-table th:nth-child(3),
@@ -210,7 +198,6 @@ display:none;
 .summary-box{
 width:100%;
 }
-
 }
 
 </style>
@@ -220,19 +207,14 @@ width:100%;
 
 <header>
 <div class="nav-right">
-
-<span class="cart" onclick="window.location.href='store.php'">
-Home
-</span>
+<span class="cart" onclick="window.location.href='store.php'">Home</span>
 
 <div class="profile-dropdown">
-
 <span class="account-btn">Account ▾</span>
 
 <div class="dropdown-menu">
 <button id="logout-btn">Logout</button>
 </div>
-
 </div>
 
 </div>
@@ -256,8 +238,7 @@ Home
 </tr>
 </thead>
 
-<tbody id="cart-items">
-</tbody>
+<tbody id="cart-items"></tbody>
 
 </table>
 
@@ -268,137 +249,193 @@ Home
 <span id="final-total">₱0</span>
 </div>
 
-<button class="checkout-btn">
-Checkout
-</button>
+<button class="checkout-btn">Checkout</button>
 
 </div>
-
 </div>
 
 <script>
 
-document.addEventListener("DOMContentLoaded",()=>{
+document.addEventListener("DOMContentLoaded", () => {
 
-const cartItemsContainer=document.getElementById("cart-items");
-const finalTotal=document.getElementById("final-total");
-const cartCount=document.getElementById("cart-count");
+const cartItemsContainer = document.getElementById("cart-items");
+const finalTotal = document.getElementById("final-total");
+const cartCount = document.getElementById("cart-count");
+const checkoutBtn = document.querySelector(".checkout-btn");
 
-let cart=JSON.parse(localStorage.getItem("cart"))||[];
+let cart = [];
 
-function formatPrice(num){
-num = Number(num);
-return "₱" + num.toLocaleString();
+/* LOAD CART FROM DATABASE */
+async function loadCart(){
+const res = await fetch('cart_fetch.php');
+cart = await res.json();
+renderCart();
 }
 
-function updateTotals(){
-
-let total=0;
-let count=0;
-
-cart.forEach(item=>{
-total += Number(item.price) * Number(item.quantity);
-count += Number(item.quantity);
-});
-
-finalTotal.textContent=formatPrice(total);
-cartCount.textContent=count;
-
-}
-
+/* RENDER CART */
 function renderCart(){
 
-cartItemsContainer.innerHTML="";
+cartItemsContainer.innerHTML = "";
 
-if(cart.length===0){
+if(cart.length === 0){
 
-cartItemsContainer.innerHTML=`
+cartItemsContainer.innerHTML = `
 <tr>
-<td colspan="7" class="empty-cart">
-Your cart is empty
-</td>
+<td colspan="7" class="empty-cart">Your cart is empty</td>
 </tr>
 `;
 
-updateTotals();
+finalTotal.textContent = "₱0";
+cartCount.textContent = 0;
 return;
-
 }
 
-cart.forEach((item,index)=>{
+let subtotal = 0;
 
-cartItemsContainer.innerHTML+=`
+cart.forEach(item => {
 
+subtotal += Number(item.product_price) * Number(item.quantity);
+
+/* IMAGE PRIORITY
+1 admin uploaded image
+2 default product image
+3 fallback image
+*/
+
+let imgSrc = "assets/default.png";
+
+if(item.uploaded_image){
+imgSrc = `assets/uploads/${item.uploaded_image}`;
+}
+else if(item.product_image){
+imgSrc = `assets/${item.product_image}`;
+}
+
+cartItemsContainer.innerHTML += `
 <tr>
 
 <td class="item-cell">
-<img src="${item.image}">
-${item.name}
+<img src="${imgSrc}" alt="${item.product_name}" onerror="this.src='assets/default.png'">
+${item.product_name}
 </td>
 
-<td>${item.storage||"-"}</td>
+<td>${item.storage || "-"}</td>
 
-<td>${item.color||"-"}</td>
+<td>${item.color || "-"}</td>
 
-<td class="price-cell">${formatPrice(item.price)}</td>
+<td class="price-cell">
+₱${Number(item.product_price).toLocaleString()}
+</td>
 
 <td>${item.quantity}</td>
 
-<td class="total-cell">${formatPrice(item.price*item.quantity)}</td>
+<td class="total-cell">
+₱${(Number(item.product_price) * Number(item.quantity)).toLocaleString()}
+</td>
 
 <td>
-<button class="remove-btn" data-index="${index}">
-×
-</button>
+<button class="remove-btn" data-id="${item.id}">×</button>
+
 </td>
 
 </tr>
-
 `;
-
 });
 
-document.querySelectorAll(".remove-btn").forEach(btn=>{
+finalTotal.textContent = "₱" + subtotal.toLocaleString();
 
-btn.addEventListener("click",e=>{
-
-const index=parseInt(e.target.dataset.index);
-
-cart.splice(index,1);
-
-localStorage.setItem("cart",JSON.stringify(cart));
-
-renderCart();
-
-updateTotals();
-
-});
-
-});
-
-updateTotals();
+cartCount.textContent = cart.reduce(
+(sum,item)=> sum + Number(item.quantity),
+0
+);
 
 }
 
-renderCart();
+/* INITIAL LOAD */
+loadCart();
 
-/* ===== ACCOUNT DROPDOWN ===== */
+/* REMOVE ITEM */
+cartItemsContainer.addEventListener("click", async e => {
+    if(e.target.classList.contains("remove-btn")){
+        const id = e.target.dataset.id;
+        if(!id) return;
 
-const dropdown=document.querySelector(".dropdown-menu");
-const profile=document.querySelector(".profile-dropdown");
+       try {
+    const response = await fetch('cart_remove.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `id=${id}`
+    });
+    
+    const text = await response.text(); // <-- read raw response
+    console.log("Server response:", text); // <-- check browser console
 
-profile.addEventListener("click",e=>{
+    const data = JSON.parse(text); // parse manually
+
+    if(data.status === "success"){
+        alert("Item removed successfully!");
+        loadCart();
+    } else {
+        alert(`Failed to remove item: ${data.message}`);
+    }
+
+} catch(err){
+    console.error(err);
+    alert("Network error. Please check console.");
+}
+    }
+});
+
+/* CHECKOUT */
+checkoutBtn.addEventListener("click", async () => {
+
+try{
+
+const res = await fetch('cart_checkout.php',{
+method:'POST'
+});
+
+const data = await res.json();
+
+if(data.status === "success"){
+
+alert(`Checkout successful! Order ID: ${data.order_id}`);
+loadCart();
+
+}else{
+
+alert(`Checkout failed: ${data.message}`);
+
+}
+
+}catch(err){
+
+console.error(err);
+alert("Network error during checkout.");
+
+}
+
+});
+
+/* ACCOUNT DROPDOWN */
+const dropdown = document.querySelector(".dropdown-menu");
+const profile = document.querySelector(".profile-dropdown");
+
+profile.addEventListener("click", e => {
 e.stopPropagation();
-dropdown.style.display=dropdown.style.display==="block"?"none":"block";
+dropdown.style.display =
+dropdown.style.display === "block"
+? "none"
+: "block";
 });
 
-document.addEventListener("click",()=>{
-dropdown.style.display="none";
+document.addEventListener("click", ()=>{
+dropdown.style.display = "none";
 });
 
+/* LOGOUT */
 document.getElementById("logout-btn").addEventListener("click",()=>{
-localStorage.removeItem("cart");
-window.location.href="login.html";
+window.location.href = "index.html";
 });
 
 });

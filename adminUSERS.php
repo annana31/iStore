@@ -5,6 +5,27 @@ if (!isset($_SESSION["admin_id"]) || $_SESSION["role"] !== "admin") {
     header("Location: adminLOGIN.html");
     exit();
 }
+
+/* DATABASE CONNECTION */
+$conn = new mysqli("localhost", "root", "", "store_db");
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+/* DELETE USER */
+if(isset($_POST['delete_user'])){
+
+    $user_id = intval($_POST['user_id']);
+
+    $stmt = $conn->prepare("DELETE FROM users WHERE id=? AND role!='admin'");
+    $stmt->bind_param("i",$user_id);
+    $stmt->execute();
+
+    echo "success";
+    exit();
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -267,19 +288,26 @@ users .delete-btn:hover { background: #3f3e3e; }
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>john_doe</td>
-                    <td><button class="delete-btn">Delete</button></td>
-                </tr>
-                <tr>
-                    <td>jane_smith</td>
-                    <td><button class="delete-btn">Delete</button></td>
-                </tr>
-                <tr>
-                    <td>alice_wong</td>
-                    <td><button class="delete-btn">Delete</button></td>
-                </tr>
-            </tbody>
+
+<?php
+$result = $conn->query("SELECT id, username FROM users WHERE role='customer'");
+
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+
+        echo "
+        <tr>
+            <td>{$row['username']}</td>
+            <td>
+                <button class='delete-btn' data-id='{$row['id']}'>Delete</button>
+            </td>
+        </tr>";
+    }
+}
+?>
+
+</tbody>
+</tbody>
         </table>
     </users>
 
@@ -337,7 +365,7 @@ const modalYes = document.getElementById('modal-yes');
 const modalNo = document.getElementById('modal-no');
 let rowToDelete = null;
 
-document.querySelectorAll('.delete-btn').forEach(btn => {
+document.querySelectorAll('.delete-btn:not([disabled])').forEach(btn => {
     btn.addEventListener('click', () => {
         rowToDelete = btn.closest('tr');
         const username = rowToDelete.querySelector('td').innerText;
@@ -347,11 +375,33 @@ document.querySelectorAll('.delete-btn').forEach(btn => {
 });
 
 modalYes.addEventListener('click', () => {
+
     if (rowToDelete) {
-        rowToDelete.remove();
+
+        const userId = rowToDelete.querySelector('.delete-btn').dataset.id;
+
+        fetch("adminUSERS.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: "delete_user=1&user_id=" + userId
+        })
+        .then(res => res.text())
+        .then(data => {
+
+            if(data === "success"){
+                rowToDelete.remove();
+                showToast("Account Deleted");
+            }else{
+                showToast("Error deleting user");
+            }
+
+        });
+
         rowToDelete = null;
-        showToast('Account Deleted');
     }
+
     modalOverlay.style.display = 'none';
 });
 

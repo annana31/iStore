@@ -489,7 +489,7 @@ while($row = $result->fetch_assoc()){
                 <option>Watches</option>
                 <option>Accessories</option>
             </select>
-            <input type="number" id="edit-price" placeholder="Price ($)" min="0" step="0.01" required>
+            <input type="number" id="edit-price" placeholder="Price ($)" min="0" step="0.1" required>
             <input type="file" id="edit-image-file" accept="image/*">
             <div class="modal-buttons">
                 <button type="submit" class="save-btn">Save</button>

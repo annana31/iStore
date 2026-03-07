@@ -20,30 +20,24 @@ function formatPrice(price){
 }
 
 
-// =========================
-// LOAD & NORMALIZE CART
-// =========================
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
-cart = cart.map(item => ({
-  name: item.name || item.product_name || "Unknown",
-  price: Number(item.price) || parseFloat(item.product_price) || 0,
-  image: item.image || item.product_image || "",
-  quantity: item.quantity || 1,
-  storage: item.storage || "",
-  color: item.color || ""
-}));
-localStorage.setItem("cart", JSON.stringify(cart));
 
 
 // =========================
-// UPDATE CART COUNT
+// UPDATE CART COUNT FROM DATABASE
 // =========================
-function updateCartCount() {
-  if (cartCount) {
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    cartCount.textContent = totalItems;
+async function updateCartCount() {
+  try {
+    const res = await fetch('cart_fetch.php'); // fetch latest cart items from DB
+    const data = await res.json();
+    const totalItems = data.reduce((sum, item) => sum + Number(item.quantity), 0);
+    if (cartCount) cartCount.textContent = totalItems;
+  } catch (err) {
+    console.error("Failed to fetch cart count:", err);
+    if (cartCount) cartCount.textContent = 0;
   }
 }
+
+// Call this once on page load to initialize
 updateCartCount();
 
 
@@ -81,7 +75,7 @@ document.body.addEventListener("click", e => {
   const product = button.closest(".product");
   if (!product) return;
 
-  const category = product.dataset.category;
+  const category = product.dataset.category.toLowerCase();
 
   colorSelect.parentElement.style.display = "none";
   storageSelect.parentElement.style.display = "none";
@@ -105,7 +99,8 @@ document.body.addEventListener("click", e => {
     storageSelect.value = "128GB";
   }
 
-  panelImage.src = product.querySelector("img")?.src || "";
+panelImage.src = product.querySelector("img")?.dataset.src || product.querySelector("img")?.src || "assets/default.png";
+
   panelName.innerText = product.querySelector("h3")?.innerText || "";
   panelPrice.innerText = product.querySelector("p")?.innerText || "";
   quantityInput.value = 1;
@@ -137,38 +132,55 @@ document.addEventListener("click",e=>{
 // =========================
 // ADD TO CART
 // =========================
-panelAddBtn.addEventListener("click",e=>{
+
+
+panelAddBtn.addEventListener("click", async e => {
   e.preventDefault();
-  e.stopPropagation();
 
   const name = panelName.innerText;
-
-  // 🔥 FIX PRICE PARSING
   const price = parseFloat(panelPrice.innerText.replace(/[₱,]/g,"")) || 0;
-
-  const image = panelImage.src;
   const quantity = parseInt(quantityInput.value) || 1;
+  const storage = storageSelect.parentElement.style.display !== "none" ? storageSelect.value : "";
+  const color = colorSelect.parentElement.style.display !== "none" ? colorSelect.value : "";
+  const image = panelImage.src.split("/").pop(); // get filename only
 
-  const storage = storageSelect.parentElement.style.display!=="none"?storageSelect.value:"";
-  const color = colorSelect.parentElement.style.display!=="none"?colorSelect.value:"";
+  try {
+    const res = await fetch('store.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `action=add_to_cart&product_name=${encodeURIComponent(name)}&product_price=${price}&quantity=${quantity}&storage=${encodeURIComponent(storage)}&color=${encodeURIComponent(color)}&product_image=${encodeURIComponent(image)}`
 
-  const existingItem = cart.find(item =>
-    item.name===name &&
-    item.storage===storage &&
-    item.color===color
-  );
+    });
 
-  if(existingItem){
-    existingItem.quantity+=quantity;
-  }else{
-    cart.push({name,price,image,quantity,storage,color});
+    const data = await res.json();
+
+    if (data.status === 'success') {
+      showNotification(`${name} added to cart!`);
+      updateCartCount(); // refresh cart count
+      closePanel();
+    } else {
+      alert("Error adding to cart: " + data.message);
+    }
+  } catch(err) {
+    console.error(err);
+    alert("Network error while adding to cart.");
   }
 
-  localStorage.setItem("cart",JSON.stringify(cart));
-  updateCartCount();
-  showNotification(`${name} added to cart!`);
-  closePanel();
+
+
+  async function updateCartCountFromDB() {
+  try {
+    const res = await fetch('cart_fetch.php');
+    const data = await res.json();
+    const totalItems = data.reduce((sum, item) => sum + Number(item.quantity), 0);
+    if (cartCount) cartCount.textContent = totalItems;
+  } catch (err) {
+    console.error(err);
+  }
+}
 });
+
+
 
 
 // =========================
@@ -176,40 +188,77 @@ panelAddBtn.addEventListener("click",e=>{
 // =========================
 if(cartItemsContainer) renderCart();
 
-function renderCart(){
+async function renderCart() {
+    if (!cartItemsContainer) return;
 
-cartItemsContainer.innerHTML="";
+    try {
+        const res = await fetch('cart_fetch.php');
+        const cartData = await res.json();
 
-if(cart.length===0){
-cartItemsContainer.innerHTML="<p>Your cart is empty.</p>";
-updateTotals(0);
-return;
-}
+        cartItemsContainer.innerHTML = "";
 
-let subtotal=0;
+        if (cartData.length === 0) {
+            cartItemsContainer.innerHTML = `
+            <tr>
+                <td colspan="7" class="empty-cart">Your cart is empty</td>
+            </tr>`;
+            finalTotal.textContent = "₱0";
+            cartCount.textContent = 0;
+            return;
+        }
 
-cart.forEach((item,index)=>{
+        let subtotal = 0;
 
-subtotal += item.price * item.quantity;
+       cartData.forEach(item => {
+    const imagePath = item.product_image ? `assets/${item.product_image}` : "assets/default.png";
 
-cartItemsContainer.innerHTML +=`
-<div class="cart-item" data-index="${index}">
-<img src="${item.image}">
-<div class="item-details">
-<h3>${item.name}</h3>
-${item.storage?`<p>Storage: ${item.storage}</p>`:""}
-${item.color?`<p>Color: ${item.color}</p>`:""}
-<p>Price: ${formatPrice(item.price)}</p>
-<p>Quantity: <input type="number" class="quantity-input" value="${item.quantity}" min="1" readonly></p>
-<button class="remove-btn">Remove</button>
-</div>
-<h3 class="item-total">${formatPrice(item.price*item.quantity)}</h3>
-</div>
-`;
+    subtotal += Number(item.product_price) * Number(item.quantity);
+
+    cartItemsContainer.innerHTML += `
+    <tr>
+        <td class="item-cell">
+            <img src="${imagePath}" alt="${item.product_name}" style="width:60px;height:auto;">
+            ${item.product_name}
+        </td>
+        <td>${item.storage || "-"}</td>
+        <td>${item.color || "-"}</td>
+        <td class="price-cell">₱${Number(item.product_price).toLocaleString()}</td>
+        <td>${item.quantity}</td>
+        <td class="total-cell">₱${(Number(item.product_price) * Number(item.quantity)).toLocaleString()}</td>
+        <td>
+            <button class="remove-btn" data-id="${item.id}">×</button>
+        </td>
+    </tr>`;
 });
 
-updateTotals(subtotal);
-attachCartItemEvents();
+
+
+        finalTotal.textContent = "₱" + subtotal.toLocaleString();
+
+        // Remove buttons
+        document.querySelectorAll(".remove-btn").forEach(btn => {
+            btn.addEventListener("click", async e => {
+                const id = e.target.dataset.id;
+                await fetch('cart_remove.php', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                    body:`id=${id}`
+                });
+                await renderCart(); // reload after removing
+            });
+        });
+
+        // Update cart count in navbar
+        const totalItems = cartData.reduce((sum, item) => sum + Number(item.quantity), 0);
+        cartCount.textContent = totalItems;
+
+    } catch (err) {
+        console.error("Failed to fetch cart items:", err);
+        cartItemsContainer.innerHTML = `
+        <tr>
+            <td colspan="7" class="empty-cart">Failed to load cart.</td>
+        </tr>`;
+    }
 }
 
 
@@ -232,22 +281,25 @@ if(heroTotalEl) heroTotalEl.textContent = formatPrice(subtotal);
 // =========================
 // CART EVENTS
 // =========================
-function attachCartItemEvents(){
+function attachCartItemEventsDB() {
+  document.querySelectorAll(".cart-item").forEach(itemEl => {
+    const removeBtn = itemEl.querySelector(".remove-btn");
+    const id = itemEl.dataset.id; // database id
 
-document.querySelectorAll(".cart-item").forEach(itemEl=>{
-
-const index=parseInt(itemEl.dataset.index);
-const removeBtn=itemEl.querySelector(".remove-btn");
-
-removeBtn.onclick=()=>{
-cart.splice(index,1);
-localStorage.setItem("cart",JSON.stringify(cart));
-renderCart();
-updateCartCount();
-};
-
-});
-
+    removeBtn.onclick = async () => {
+      try {
+        await fetch('cart_remove.php', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: `id=${id}`
+        });
+        renderCart(); // refresh cart display
+        updateCartCount(); // refresh nav cart count
+      } catch (err) {
+        console.error("Failed to remove item:", err);
+      }
+    };
+  });
 }
 
 
@@ -313,7 +365,7 @@ profileDropdown.classList.remove("active");
 if(logoutBtn){
 logoutBtn.addEventListener("click",()=>{
 localStorage.removeItem("cart");
-window.location.href="login.html";
+window.location.href="index.html";
 });
 }
 

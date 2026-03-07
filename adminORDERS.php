@@ -222,42 +222,45 @@ orders .remove-btn:hover { background: #b3b3b3; }
         <div class="orders-grid">
 
 <?php
-$sql = "SELECT * FROM cart_items ORDER BY added_at DESC";
+$sql = "SELECT * FROM admin_orders ORDER BY created_at DESC";
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
-while ($row = $result->fetch_assoc()) {
-?>
+    while ($order = $result->fetch_assoc()) {
+        // Fetch items for this order
+        $items_res = $conn->query("SELECT * FROM order_items WHERE order_id=".$order['id']);
 
-<div class="order-card" data-status="<?= $row['status']; ?>" id="order-<?= $row['id']; ?>">
-<div class="order-details">
-<div class="product-name"><?= htmlspecialchars($row['product_name']); ?></div>
-<div class="quantity">Price: ₱<?= number_format($row['product_price'],2); ?></div>
-<div class="quantity">Quantity: <?= $row['quantity']; ?></div>
-<div class="quantity">User: <?= htmlspecialchars($row['username']); ?></div>
-<div class="quantity">Ordered at: <?= $row['added_at']; ?></div>
-<div class="quantity">
-Status:
-<strong class="status" style="color: <?= ($row['status']=='Confirmed')?'green':'orange'; ?>;">
-<?= $row['status']; ?>
-</strong>
-</div>
-</div>
+        echo '<div class="order-card" data-status="'.htmlspecialchars($order['status']).'" id="order-'.$order['id'].'">';
+echo '<div class="order-details">';
 
-<div class="order-actions">
-<?php if($row['status']=='Pending'): ?>
-<button class="confirm-btn" data-id="<?= $row['id']; ?>">Confirm</button>
-<button class="remove-btn" data-id="<?= $row['id']; ?>">Remove</button>
-<?php else: ?>
-Confirmed
-<?php endif; ?>
-</div>
-</div>
+// Display product details directly from admin_orders
+echo '<div class="product-name">'.htmlspecialchars($order['product_name']).'</div>';
+echo '<div class="quantity">Quantity: '.htmlspecialchars($order['quantity']).'</div>';
+echo '<div class="quantity">Total Price: ₱'.number_format($order['total'],2).'</div>';
+if(!empty($order['storage'])) echo '<div class="quantity">Storage: '.htmlspecialchars($order['storage']).'</div>';
+if(!empty($order['color'])) echo '<div class="quantity">Color: '.htmlspecialchars($order['color']).'</div>';
 
-<?php
-}
+// Display user and order info
+echo '<div class="quantity">User: '.htmlspecialchars($order['username']).'</div>';
+echo '<div class="quantity">Ordered at: '.htmlspecialchars($order['created_at']).'</div>';
+echo '<div class="quantity">Status: <strong class="status" style="color: '.($order['status']=='Confirmed'?'green':'orange').'">'.htmlspecialchars($order['status']).'</strong></div>';
+
+echo '</div>'; // end order-details
+
+        // Action buttons
+        echo '<div class="order-actions">';
+        if($order['status']=='Pending'){
+            echo '<button class="confirm-btn" data-id="'.$order['id'].'">Confirm</button>';
+            echo '<button class="remove-btn" data-id="'.$order['id'].'">Remove</button>';
+        } else {
+            echo 'Confirmed';
+        }
+        echo '</div>'; // end order-actions
+
+        echo '</div>'; // end order-card
+    }
 } else {
-echo "<p>No orders found.</p>";
+    echo "<p>No orders found.</p>";
 }
 ?>
 

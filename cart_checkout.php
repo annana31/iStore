@@ -1,0 +1,47 @@
+<?php
+session_start();
+include "config.php";
+
+$username = $_SESSION['username'] ?? null;
+if (!$username) { 
+    exit(json_encode(['status'=>'error','message'=>'Not logged in'])); 
+}
+
+$cart_res = $conn->query("SELECT * FROM cart_items WHERE username='$username'");
+if($cart_res->num_rows == 0){
+    exit(json_encode(['status'=>'error','message'=>'Cart is empty']));
+}
+
+while($item = $cart_res->fetch_assoc()){
+    $stmt = $conn->prepare("
+        INSERT INTO admin_orders 
+        (username, total, status, product_name, quantity, storage, color) 
+        VALUES (?, ?, 'Pending', ?, ?, ?, ?)
+    ");
+    if(!$stmt){
+        error_log("Prepare failed: ".$conn->error);
+        exit(json_encode(['status'=>'error','message'=>'Server error']));
+    }
+    $total_item = $item['product_price'] * $item['quantity'];
+    $stmt->bind_param("sdsiss", 
+        $username,
+        $total_item,
+        $item['product_name'],
+        $item['quantity'],
+        $item['storage'],
+        $item['color']
+    );
+    if(!$stmt->execute()){
+        error_log("Execute failed: ".$stmt->error);
+        exit(json_encode(['status'=>'error','message'=>'Server error']));
+    }
+}
+
+$del_res = $conn->query("DELETE FROM cart_items WHERE username='$username'");
+if(!$del_res){
+    error_log("Cart delete failed: ".$conn->error);
+    exit(json_encode(['status'=>'error','message'=>'Server error']));
+}
+
+echo json_encode(['status'=>'success']);
+?>
