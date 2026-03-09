@@ -6,6 +6,7 @@ if (!isset($_SESSION["admin_id"]) || $_SESSION["role"] !== "admin") {
     exit();
 }
 
+
 /* DATABASE CONNECTION */
 $conn = new mysqli("localhost", "root", "", "store_db");
 
@@ -26,7 +27,7 @@ if(isset($_POST['add_product'])){
     $imageName = time() . "_" . $_FILES['image']['name'];
     $tmpName = $_FILES['image']['tmp_name'];
 
-    $uploadDir = "assets/uploads/";
+    $uploadDir = "assets/";
     $imagePath = $uploadDir . $imageName;
 
     move_uploaded_file($tmpName, $imagePath);
@@ -398,9 +399,9 @@ a {
 <!-- NAVBAR -->
 <div class="navbar">
     <div class="nav-left">
-        <a href="#">Orders</a>
-        <a href="#">Products</a>
-        <a href="#">Users</a>
+        <a href="adminORDERS.php">Orders</a>
+        <a href="adminPRODUCTS.php">Products</a>
+        <a href="adminUSERS.php">Users</a>
     </div>
     <div class="account" id="account-btn">Account
         <div class="dropdown-menu" id="account-dropdown">
@@ -454,21 +455,18 @@ $result = $conn->query("SELECT * FROM admin_products");
 while($row = $result->fetch_assoc()){
 ?>
 
-<div class="product-card">
-
-<img src="<?php echo htmlspecialchars($row['image']); ?>" alt="Product Image">
-
-<h3><?php echo $row['name']; ?></h3>
-
-<p>₱<?php echo number_format($row['price']); ?></p>
-
-<form method="POST">
-<input type="hidden" name="delete_id" value="<?php echo $row['id']; ?>">
-<button type="submit">Delete</button>
-</form>
-
+<div class="product-card" data-category="<?php echo htmlspecialchars($row['category']); ?>">
+    <img src="<?php echo htmlspecialchars($row['image']); ?>" alt="Product Image">
+    <h3><?php echo $row['name']; ?></h3>
+    <p>₱<?php echo number_format($row['price']); ?></p>
+    <div class="actions">
+        <button type="button" class="edit-btn">Edit</button>
+        <form method="POST" style="display:inline;">
+            <input type="hidden" name="delete_id" value="<?php echo $row['id']; ?>">
+            <button type="submit" class="delete-btn">Delete</button>
+        </form>
+    </div>
 </div>
-
 <?php } ?>
 
 </div>
@@ -489,7 +487,8 @@ while($row = $result->fetch_assoc()){
                 <option>Watches</option>
                 <option>Accessories</option>
             </select>
-            <input type="number" id="edit-price" placeholder="Price ($)" min="0" step="0.1" required>
+            <input type="hidden" id="edit-id">
+<input type="text" id="edit-price" placeholder="Price (₱)" required>
             <input type="file" id="edit-image-file" accept="image/*">
             <div class="modal-buttons">
                 <button type="submit" class="save-btn">Save</button>
@@ -514,16 +513,7 @@ while($row = $result->fetch_assoc()){
 <div id="notification">Product action completed!</div>
 
 <script>
-// NAVBAR
-const accountBtn = document.getElementById('account-btn');
-const accountDropdown = document.getElementById('account-dropdown');
-const logoutBtn = document.getElementById('logout-btn');
-accountBtn.addEventListener('click', ()=>{accountDropdown.style.display = accountDropdown.style.display==='block'?'none':'block';});
-document.addEventListener('click', e=>{if(!accountBtn.contains(e.target)) accountDropdown.style.display='none';});
-document.querySelector('.nav-left a:nth-child(1)').addEventListener('click',()=>{window.location.href='adminORDERS.php';});
-document.querySelector('.nav-left a:nth-child(2)').addEventListener('click',()=>{window.location.href='adminPRODUCTS.php';});
-document.querySelector('.nav-left a:nth-child(3)').addEventListener('click',()=>{window.location.href='admin_logout.php';});
-logoutBtn.addEventListener('click',()=>{window.location.href='index.html';});
+
 
 // ======================
 // NOTIFICATION FUNCTION
@@ -535,74 +525,110 @@ function showNotification(message){
     setTimeout(()=>{notification.style.display='none';},2000);
 }
 
-
-
-// ======================
-// BIND EDIT & DELETE TO NEW PRODUCTS
-// ======================
-function bindEditDelete(card){
-    const editBtn = card.querySelector('.edit-btn');
-    const deleteBtn = card.querySelector('.delete-btn');
-
-    editBtn.addEventListener('click', ()=>{
-        productToEdit = card;
-        editName.value = card.querySelector('h3').innerText;
-        editCategory.value = card.getAttribute('data-category');
-        editPrice.value = parseFloat(card.querySelector('p').innerText.replace('₱',''));
-        editImageFile.value='';
-        editModalOverlay.style.display='flex';
-    });
-
-    deleteBtn.addEventListener('click', ()=>{
-        productToDelete = card;
-        deleteModalOverlay.style.display='flex';
-    });
-}
-
 // ======================
 // EDIT & DELETE LOGIC
 // ======================
-let productToEdit=null, productToDelete=null;
+let productToEdit = null, productToDelete = null;
 const editModalOverlay = document.getElementById('edit-modal-overlay');
 const editForm = document.getElementById('edit-form');
 const editName = document.getElementById('edit-name');
 const editCategory = document.getElementById('edit-category');
 const editPrice = document.getElementById('edit-price');
 const editImageFile = document.getElementById('edit-image-file');
-document.getElementById('edit-cancel').addEventListener('click',()=>{editModalOverlay.style.display='none'; productToEdit=null;});
-editForm.addEventListener('submit', e=>{
-    e.preventDefault();
-    if(!productToEdit) return;
-    productToEdit.querySelector('h3').innerText = editName.value;
-    productToEdit.setAttribute('data-category', editCategory.value);
-    productToEdit.querySelector('p').innerText = `₱${parseFloat(editPrice.value).toFixed(2)}`;
-    if(editImageFile.files && editImageFile.files[0]){
-        const reader = new FileReader();
-        reader.onload = function(ev){ productToEdit.querySelector('img').src = ev.target.result; }
-        reader.readAsDataURL(editImageFile.files[0]);
-    }
-    editModalOverlay.style.display='none';
-    productToEdit=null;
-    showNotification('Product Updated Successfully!');
-});
+const editId = document.getElementById('edit-id');
 
-// DELETE MODAL
 const deleteModalOverlay = document.getElementById('delete-modal-overlay');
 const confirmDeleteBtn = document.getElementById('confirm-delete');
 const cancelDeleteBtn = document.getElementById('cancel-delete');
-confirmDeleteBtn.addEventListener('click', ()=>{
+
+// CANCEL EDIT
+document.getElementById('edit-cancel').addEventListener('click', () => {
+    editModalOverlay.style.display = 'none';
+    productToEdit = null;
+});
+
+// BIND EDIT & DELETE BUTTONS
+function bindEditDelete(card){
+    const editBtn = card.querySelector('.edit-btn');
+    const deleteBtn = card.querySelector('.delete-btn');
+
+    // EDIT BUTTON
+    editBtn.addEventListener('click', () => {
+        productToEdit = card;
+        editName.value = card.querySelector('h3').innerText;
+        editCategory.value = card.getAttribute('data-category');
+
+        // Remove ₱ and commas
+        const rawPrice = card.querySelector('p').innerText.replace('₱','').replace(/,/g,'');
+        editPrice.value = rawPrice;
+
+        editId.value = card.querySelector('input[name="delete_id"]').value;
+        editImageFile.value = '';
+        editModalOverlay.style.display = 'flex';
+    });
+
+    // DELETE BUTTON
+    deleteBtn.addEventListener('click', () => {
+        productToDelete = card;
+        deleteModalOverlay.style.display = 'flex';
+    });
+}
+
+// SAVE EDIT (send to updateProduct.php)
+editForm.addEventListener('submit', e => {
+    e.preventDefault();
+    if(!productToEdit) return;
+
+    const formData = new FormData();
+    formData.append('edit_id', editId.value);
+    formData.append('name', editName.value);
+    formData.append('category', editCategory.value);
+    formData.append('price', editPrice.value.replace(/[^0-9.]/g, ''));
+    if(editImageFile.files[0]) formData.append('image', editImageFile.files[0]);
+
+    fetch('updateProduct.php', { method: 'POST', body: formData })
+    .then(res => res.text())
+    .then(data => {
+        // Update DOM
+        productToEdit.querySelector('h3').innerText = editName.value;
+        productToEdit.setAttribute('data-category', editCategory.value);
+        const priceNumber = parseFloat(editPrice.value.replace(/[^0-9.]/g,''));
+        productToEdit.querySelector('p').innerText = `₱${priceNumber.toLocaleString()}`;
+
+        if(editImageFile.files && editImageFile.files[0]){
+            const reader = new FileReader();
+            reader.onload = ev => productToEdit.querySelector('img').src = ev.target.result;
+            reader.readAsDataURL(editImageFile.files[0]);
+        }
+
+        editModalOverlay.style.display='none';
+        productToEdit = null;
+        showNotification('Product Updated Successfully!');
+    });
+});
+
+// DELETE MODAL
+confirmDeleteBtn.addEventListener('click', () => {
     if(productToDelete){
         productToDelete.remove();
-        productToDelete=null;
-        deleteModalOverlay.style.display='none';
+        productToDelete = null;
+        deleteModalOverlay.style.display = 'none';
         showNotification('Product Deleted Successfully!');
     }
 });
-cancelDeleteBtn.addEventListener('click', ()=>{ deleteModalOverlay.style.display='none'; productToDelete=null; });
-deleteModalOverlay.addEventListener('click', e=>{if(e.target===deleteModalOverlay){deleteModalOverlay.style.display='none'; productToDelete=null;} });
+cancelDeleteBtn.addEventListener('click', () => {
+    deleteModalOverlay.style.display = 'none';
+    productToDelete = null;
+});
+deleteModalOverlay.addEventListener('click', e => {
+    if(e.target === deleteModalOverlay){
+        deleteModalOverlay.style.display = 'none';
+        productToDelete = null;
+    }
+});
 
 // INITIAL BINDING FOR EXISTING PRODUCTS
-document.querySelectorAll('.product-card').forEach(card=>bindEditDelete(card));
+document.querySelectorAll('.product-card').forEach(card => bindEditDelete(card));
 </script>
 </body>
 </html>

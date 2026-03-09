@@ -1,11 +1,11 @@
 <?php
 session_start();
 
-// Redirect if not admin
 if (!isset($_SESSION["admin_id"]) || $_SESSION["role"] !== "admin") {
     header("Location: adminLOGIN.html");
     exit();
 }
+
 
 $conn = new mysqli("localhost", "root", "", "store_db");
 if ($conn->connect_error) {
@@ -228,7 +228,7 @@ $result = $conn->query($sql);
 if ($result->num_rows > 0) {
     while ($order = $result->fetch_assoc()) {
         // Fetch items for this order
-        $items_res = $conn->query("SELECT * FROM order_items WHERE order_id=".$order['id']);
+        $items_res = $conn->query("SELECT * FROM admin_orders WHERE id=".$order['id']);
 
         echo '<div class="order-card" data-status="'.htmlspecialchars($order['status']).'" id="order-'.$order['id'].'">';
 echo '<div class="order-details">';

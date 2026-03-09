@@ -47,7 +47,6 @@ while ($row = $result->fetch_assoc()) {
         'quantity' => $row['quantity'],
         'storage' => $row['storage'],
         'color' => $row['color'],
-        'uploaded_image' => $row['admin_image'],   // admin-added image
         'product_image' => $row['product_image']  // old static image
     ];
 }

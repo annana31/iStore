@@ -6,6 +6,7 @@ if (!isset($_SESSION["admin_id"]) || $_SESSION["role"] !== "admin") {
     exit();
 }
 
+
 /* DATABASE CONNECTION */
 $conn = new mysqli("localhost", "root", "", "store_db");
 
@@ -122,13 +123,13 @@ a { text-decoration: none; color: inherit; }
 /* ======================
    USERS LIST (SCOPED)
 ====================== */
-users .users-title {
+.users .users-title {
     font-size: 24px;
     font-weight: 600;
     margin-bottom: 25px;
 }
 
-users table {
+.users table {
     width: 100%;
     border-collapse: collapse;
     background: #fff;
@@ -137,7 +138,7 @@ users table {
     box-shadow: 0 10px 25px rgba(0,0,0,0.05);
 }
 
-users thead tr {
+.users thead tr {
     display: flex;
     justify-content: space-between;
     padding: 16px 20px;
@@ -146,7 +147,7 @@ users thead tr {
     border-bottom: 1px solid #eee;
 }
 
-users tbody tr {
+.users tbody tr {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -154,13 +155,13 @@ users tbody tr {
     padding: 16px 20px;
 }
 
-users tbody tr:hover { background: #fafafa; }
+.users tbody tr:hover { background: #fafafa; }
 
-users td:first-child { flex: 1; }       /* Username expands */
-users td:last-child { flex: 0; }        /* Delete button stays right */
+.users td:first-child { flex: 1; }       /* Username expands */
+.users td:last-child { flex: 0; }        /* Delete button stays right */
 
 /* DELETE BUTTON */
-users .delete-btn {
+.users .delete-btn {
     background: #000000;
     color: white;
     border: none;
@@ -171,7 +172,7 @@ users .delete-btn {
     transition: 0.2s ease;
 }
 
-users .delete-btn:hover { background: #3f3e3e; }
+.users .delete-btn:hover { background: #3f3e3e; }
 
 /* ======================
    MODAL
@@ -252,8 +253,8 @@ users .delete-btn:hover { background: #3f3e3e; }
 ====================== */
 @media (max-width: 768px) {
     .navbar { flex-direction: column; align-items: flex-start; }
-    users thead tr, users tbody tr { flex-direction: column; align-items: flex-start; }
-    users td:last-child { margin-top: 10px; align-self: flex-end; }
+    .users thead tr, .users tbody tr { flex-direction: column; align-items: flex-start; }
+    .users td:last-child { margin-top: 10px; align-self: flex-end; }
     .modal { max-width: 90%; padding: 25px 20px; }
     .modal .buttons button { width: 100%; max-width: 140px; }
 }
@@ -264,9 +265,9 @@ users .delete-btn:hover { background: #3f3e3e; }
 <!-- NAVBAR -->
 <div class="navbar">
     <div class="nav-left">
-        <a href="#">Orders</a>
-        <a href="#">Products</a>
-        <a href="#">Users</a>
+        <a href="adminORDERS.php">Orders</a>
+        <a href="adminPRODUCTS.php">Products</a>
+        <a href="adminUSERS.php">Users</a>
     </div>
     <div class="account" id="account-btn">Account
         <div class="dropdown-menu" id="account-dropdown">
@@ -278,23 +279,20 @@ users .delete-btn:hover { background: #3f3e3e; }
 <div class="container">
 
     <!-- USERS SECTION -->
-    <users>
-        <div class="users-title">Registered Users</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-
+ <div class="users">
+    <div class="users-title">Registered Users</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
 <?php
 $result = $conn->query("SELECT id, username FROM users WHERE role='customer'");
-
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-
         echo "
         <tr>
             <td>{$row['username']}</td>
@@ -305,12 +303,8 @@ if ($result->num_rows > 0) {
     }
 }
 ?>
-
-</tbody>
-</tbody>
-        </table>
-    </users>
-
+        </tbody>
+    </table>
 </div>
 
 <!-- CONFIRMATION MODAL -->
@@ -331,7 +325,6 @@ if ($result->num_rows > 0) {
 // ACCOUNT DROPDOWN
 const accountBtn = document.getElementById('account-btn');
 const accountDropdown = document.getElementById('account-dropdown');
-const logoutBtn = document.getElementById('logout-btn');
 
 accountBtn.addEventListener('click', () => {
     accountDropdown.style.display = accountDropdown.style.display === 'block' ? 'none' : 'block';
@@ -343,13 +336,12 @@ document.addEventListener('click', (event) => {
     }
 });
 
-// NAVBAR LINKS
-document.querySelector('.nav-left a:nth-child(1)').addEventListener('click', () => { window.location.href = 'adminORDERS.php'; });
-document.querySelector('.nav-left a:nth-child(2)').addEventListener('click', () => { window.location.href = 'adminPRODUCTS.php'; });
-document.querySelector('.nav-left a:nth-child(3)').addEventListener('click', () => { window.location.href = 'adminUSERS.php'; });
+document.getElementById('logout-btn').addEventListener('click', () => {
+    window.location.href = 'index.html';
+});
 
-// LOGOUT
-logoutBtn.addEventListener('click', () => { window.location.href = 'index.html'; });
+
+
 
 // TOAST FUNCTION
 const toast = document.getElementById('toast');
@@ -365,7 +357,7 @@ const modalYes = document.getElementById('modal-yes');
 const modalNo = document.getElementById('modal-no');
 let rowToDelete = null;
 
-document.querySelectorAll('.delete-btn:not([disabled])').forEach(btn => {
+document.querySelectorAll('.users .delete-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         rowToDelete = btn.closest('tr');
         const username = rowToDelete.querySelector('td').innerText;
@@ -375,34 +367,33 @@ document.querySelectorAll('.delete-btn:not([disabled])').forEach(btn => {
 });
 
 modalYes.addEventListener('click', () => {
+    if (!rowToDelete) return;
 
-    if (rowToDelete) {
+    const userId = rowToDelete.querySelector('.delete-btn').dataset.id;
 
-        const userId = rowToDelete.querySelector('.delete-btn').dataset.id;
-
-        fetch("adminUSERS.php", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: "delete_user=1&user_id=" + userId
-        })
-        .then(res => res.text())
-        .then(data => {
-
-            if(data === "success"){
-                rowToDelete.remove();
-                showToast("Account Deleted");
-            }else{
-                showToast("Error deleting user");
-            }
-
-        });
-
+    fetch("adminUSERS.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "delete_user=1&user_id=" + userId
+    })
+    .then(res => res.text())
+    .then(data => {
+        if(data.trim() === "success"){ // <--- TRIM
+            rowToDelete.remove();
+            showToast("Account Deleted");
+        } else {
+            showToast("Error deleting user");
+            console.log("Delete response:", data);
+        }
+        rowToDelete = null;  // clear reference AFTER success/error
+        modalOverlay.style.display = 'none';
+    })
+    .catch(err => {
+        showToast("Network error");
+        console.error(err);
         rowToDelete = null;
-    }
-
-    modalOverlay.style.display = 'none';
+        modalOverlay.style.display = 'none';
+    });
 });
 
 modalNo.addEventListener('click', () => {

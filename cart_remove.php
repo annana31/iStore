@@ -21,7 +21,8 @@ if (!$username) respond('error', 'Not logged in');
 // Check POST id
 if (!isset($_POST['id'])) respond('error', 'No ID provided');
 
-$id = intval($_POST['id']);
+$id = intval($_POST['id']); // <-- assign $id properly
+
 if ($id <= 0) respond('error', 'Invalid ID');
 
 // Delete item
@@ -32,7 +33,7 @@ $stmt->bind_param("is", $id, $username);
 
 if ($stmt->execute()) {
     if ($stmt->affected_rows > 0) {
-        respond('success');
+        respond('success', 'Item removed from cart');
     } else {
         respond('error', 'Item not found in cart');
     }
