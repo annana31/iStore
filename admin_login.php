@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Database connection
 $host = "localhost";
 $user = "root";
 $pass = "";
@@ -27,10 +26,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $user = $result->fetch_assoc();
 
-        // ✅ VERIFY HASHED PASSWORD
         if (password_verify($password, $user["password"])) {
 
-            // ✅ CHECK IF ADMIN
             if ($user["role"] === "admin") {
 
                 $_SESSION["admin_id"] = $user["id"];

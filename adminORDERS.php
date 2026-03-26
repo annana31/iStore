@@ -21,7 +21,6 @@ if ($conn->connect_error) {
 <title>Admin - Orders</title>
 <style>
 
-/* ====================== GLOBAL ====================== */
 body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -29,7 +28,6 @@ body {
 }
 a { text-decoration: none; color: inherit; }
 
-/* ====================== NAVBAR ====================== */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -139,7 +137,6 @@ orders .remove-btn {
 }
 orders .remove-btn:hover { background: #b3b3b3; }
 
-/* ====================== TOAST ====================== */
 #toast {
     position: fixed;
     top: 20px;
@@ -156,7 +153,6 @@ orders .remove-btn:hover { background: #b3b3b3; }
 }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ====================== REMOVE MODAL ====================== */
 #remove-modal {
     position: fixed;
     top: 0; left: 0;
