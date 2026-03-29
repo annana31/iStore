@@ -536,13 +536,10 @@ foreach($products as $row){
     <div class="actions">
 
         <!-- DELETE BUTTON (FORM FIXED) -->
-        <form method="POST" style="display:inline;">
-            <input type="hidden" name="delete_id" value="<?php echo $row['id']; ?>">
-            <button type="submit" class="delete-btn">Delete</button>
-        </form>
+        <button type="button" class="delete-btn" data-id="<?php echo $row['id']; ?>">Delete</button>
 
         <!-- EDIT BUTTON -->
-        <button type="button" class="edit-btn">Edit</button>
+        <button type="button" class="edit-btn" data-id="<?php echo $row['id']; ?>">Edit</button>
 
         <!-- TOGGLE AVAILABILITY -->
         <form method="POST" style="display:inline;">
@@ -614,6 +611,7 @@ function showNotification(message){
 // EDIT & DELETE LOGIC
 // ======================
 let productToEdit = null, productToDelete = null;
+let productToDeleteId = null;
 const editModalOverlay = document.getElementById('edit-modal-overlay');
 const editForm = document.getElementById('edit-form');
 const editName = document.getElementById('edit-name');
@@ -632,20 +630,25 @@ document.getElementById('edit-cancel').addEventListener('click', () => {
     productToEdit = null;
 });
 
-// BIND EDIT, DELETE, UNAVAILABLE BUTTONS
 function bindEditDelete(card){
     const editBtn = card.querySelector('.edit-btn');
     const deleteBtn = card.querySelector('.delete-btn');
-    const unavailableBtn = card.querySelector('.unavailable-btn');
+    
 
     // EDIT BUTTON
     editBtn.addEventListener('click', () => {
         productToEdit = card;
+
         editName.value = card.querySelector('h3').innerText;
         editCategory.value = card.getAttribute('data-category');
-        const rawPrice = card.querySelector('p').innerText.replace('₱','').replace(/,/g,'');
+
+        const rawPrice = card.querySelector('p').innerText
+            .replace('₱','')
+            .replace(/,/g,'');
+
         editPrice.value = rawPrice;
-        editId.value = card.querySelector('input[name="delete_id"]').value;
+        editId.value = editBtn.getAttribute('data-id');
+
         editImageFile.value = '';
         editModalOverlay.style.display = 'flex';
     });
@@ -653,8 +656,42 @@ function bindEditDelete(card){
     // DELETE BUTTON
     deleteBtn.addEventListener('click', () => {
         productToDelete = card;
+        productToDeleteId = deleteBtn.getAttribute('data-id');
         deleteModalOverlay.style.display = 'flex';
     });
+}
+
+
+
+// DELETE MODAL
+confirmDeleteBtn.addEventListener('click', () => {
+    if(productToDelete){
+
+        const formData = new FormData();
+        formData.append('delete_id', productToDeleteId);
+
+        fetch('', {
+            method: 'POST',
+            body: formData
+        }).then(() => {
+
+            productToDelete.remove();
+            productToDelete = null;
+            deleteModalOverlay.style.display = 'none';
+            showNotification('Product Deleted Successfully!');
+        });
+    }
+});
+cancelDeleteBtn.addEventListener('click', () => {
+    deleteModalOverlay.style.display = 'none';
+    productToDelete = null;
+});
+deleteModalOverlay.addEventListener('click', e => {
+    if(e.target === deleteModalOverlay) deleteModalOverlay.style.display = 'none';
+});
+editModalOverlay.addEventListener('click', e => {
+    if(e.target === editModalOverlay) editModalOverlay.style.display = 'none';
+});
 
 // SAVE EDIT (send to updateProduct.php)
 editForm.addEventListener('submit', e => {
@@ -686,26 +723,6 @@ editForm.addEventListener('submit', e => {
     });
 });
 
-// DELETE MODAL
-confirmDeleteBtn.addEventListener('click', () => {
-    if(productToDelete){
-        productToDelete.remove();
-        productToDelete = null;
-        deleteModalOverlay.style.display = 'none';
-        showNotification('Product Deleted Successfully!');
-    }
-});
-cancelDeleteBtn.addEventListener('click', () => {
-    deleteModalOverlay.style.display = 'none';
-    productToDelete = null;
-});
-deleteModalOverlay.addEventListener('click', e => {
-    if(e.target === deleteModalOverlay) deleteModalOverlay.style.display = 'none';
-});
-editModalOverlay.addEventListener('click', e => {
-    if(e.target === editModalOverlay) editModalOverlay.style.display = 'none';
-});
-
 // ACCOUNT DROPDOWN
 const accountBtn = document.getElementById('account-btn');
 const accountDropdown = document.getElementById('account-dropdown');
@@ -723,7 +740,7 @@ document.querySelectorAll('.product-card').forEach(bindEditDelete);
 // ADMIN PRODUCTS SEARCH
 // ======================
 const searchInput = document.getElementById('adminSearch');
-const productCards = document.querySelectorAll('.product-card');
+const productCards = document.querySelectorAll('.productss .product-card');
 
 searchInput.addEventListener('input', () => {
     const query = searchInput.value.toLowerCase();
@@ -731,7 +748,7 @@ searchInput.addEventListener('input', () => {
         const name = card.querySelector('h3').innerText.toLowerCase();
         const category = card.getAttribute('data-category').toLowerCase();
         if(name.includes(query) || category.includes(query)) {
-            card.style.display = 'block';
+            card.style.display = '';
         } else {
             card.style.display = 'none';
         }
