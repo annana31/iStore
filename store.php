@@ -240,6 +240,7 @@ function normalizeCategory($cat) {
     background: rgba(255, 255, 255, 0.05); 
     backdrop-filter: none; 
 }
+
     </style>
 </head>
 <body>
@@ -295,21 +296,28 @@ function normalizeCategory($cat) {
     <?php if(!empty($store_products)): ?>
     <?php foreach($store_products as $product): ?>
     <?php $category = normalizeCategory($product['category']); ?>
-    <div class="product" data-category="<?= htmlspecialchars($category) ?>">
+    <div class="product" 
+     data-category="<?= htmlspecialchars($category) ?>" 
+     data-available="<?= $product['is_available'] ?>">
         <img src="<?= htmlspecialchars($product['image']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" />
         <h3><?= htmlspecialchars($product['name']) ?></h3>
         <p>₱<?= number_format($product['price']) ?></p>
-        <button type="button" class="view-item-btn"
-            data-id="<?= $product['id'] ?>"
-            data-name="<?= htmlspecialchars($product['name']) ?>"
-            data-price="<?= $product['price'] ?>"
-            data-image="<?= htmlspecialchars($product['image']) ?>"
-            data-category="<?= htmlspecialchars($category) ?>"
-        >
-            View Item
-        </button>
-    </div>
-<?php endforeach; ?>
+                <?php if ($product['is_available'] == 1): ?>
+                <button type="button" class="view-item-btn"
+                    data-id="<?= $product['id'] ?>"
+                    data-name="<?= htmlspecialchars($product['name']) ?>"
+                    data-price="<?= $product['price'] ?>"
+                    data-image="<?= htmlspecialchars($product['image']) ?>"
+                    data-category="<?= htmlspecialchars($category) ?>"
+                >
+                    View Item
+                </button>
+            <?php else: ?>
+                <span style="color:#111;font-weight:bold;">Unavailable</span>
+            <?php endif; ?>
+
+        </div>
+    <?php endforeach; ?>
 <?php endif; ?>
     </div>
 </div> 

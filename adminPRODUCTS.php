@@ -6,12 +6,22 @@ if (!isset($_SESSION["admin_id"]) || $_SESSION["role"] !== "admin") {
     exit();
 }
 
-
 /* DATABASE CONNECTION */
 $conn = new mysqli("localhost", "root", "", "store_db");
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
+}
+
+/* TOGGLE AVAILABILITY */
+if(isset($_POST['toggle_id'])){
+    $id = $_POST['toggle_id'];
+
+    $stmt = $conn->prepare("UPDATE admin_products 
+                            SET is_available = NOT is_available 
+                            WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
 }
 
 /* ADD PRODUCT */
@@ -24,23 +34,22 @@ if(isset($_POST['add_product'])){
     $imagePath = "";
 
     if(!empty($_FILES['image']['name'])){
-    $imageName = time() . "_" . $_FILES['image']['name'];
-    $tmpName = $_FILES['image']['tmp_name'];
+        $imageName = time() . "_" . $_FILES['image']['name'];
+        $tmpName = $_FILES['image']['tmp_name'];
 
-    $uploadDir = "assets/";
-    $imagePath = $uploadDir . $imageName;
+        $uploadDir = "assets/";
+        $imagePath = $uploadDir . $imageName;
 
-    move_uploaded_file($tmpName, $imagePath);
+        move_uploaded_file($tmpName, $imagePath);
 
-    $stmt = $conn->prepare("INSERT INTO admin_products (name, price, category, image) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("sdss", $name, $price, $category, $imagePath);
-    $stmt->execute();
+        $stmt = $conn->prepare("INSERT INTO admin_products (name, price, category, image) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("sdss", $name, $price, $category, $imagePath);
+        $stmt->execute();
     }
 }
 
 /* DELETE PRODUCT */
 if(isset($_POST['delete_id'])){
-
     $id = $_POST['delete_id'];
 
     $stmt = $conn->prepare("DELETE FROM admin_products WHERE id=?");
@@ -57,7 +66,6 @@ if ($result->num_rows > 0) {
     }
 }
 ?>
-
 
 
 <!DOCTYPE html>
@@ -287,16 +295,6 @@ a {
     cursor: pointer;
 }
 
-.productss .edit-btn {
-    background: #000;
-    color: white;
-}
-
-.productss .delete-btn {
-    background: #ccc;
-    color: #111;
-}
-
 /* ======================
    EDIT MODAL
 ====================== */
@@ -392,6 +390,79 @@ a {
     display: none;
     z-index: 1000;
 }
+
+/* ======================
+   UNAVAILABLE STYLE
+====================== */
+.productss .product-card.unavailable {
+    opacity: 0.5;
+}
+
+.productss .product-card.unavailable h3,
+.productss .product-card.unavailable p {
+    text-decoration: line-through;
+}
+
+/* ======================
+   ACTION BUTTONS MINIMALIST
+====================== */
+.productss .actions button {
+    padding: 6px 5px;   /* smaller padding for a compact look */
+    min-width: 50px;      /* uniform width */
+    font-size: 13px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    transition: 0.2s ease;
+}
+
+/* Button colors */
+.productss .edit-btn {
+    background: #ccc;
+    color: #111;
+}
+
+.productss .edit-btn:hover {
+    opacity: 0.85;
+    background: #a7a7a7;
+}
+
+.productss .delete-btn {
+    background: #111;
+    color: #fff;
+}
+
+.productss .delete-btn:hover {
+    background:#202020;
+    opacity: 0.85;
+}
+
+.productss .unavailable-btn {
+    background: #ccc;
+    color: #111;
+}
+
+.productss .unavailable-btn:hover {
+    opacity: 0.85;
+    background: #a7a7a7;
+
+}
+
+.products-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px; /* same spacing as before */
+}
+
+.products-header #adminSearch {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    width: 200px; /* adjust as needed */
+}
 </style>
 </head>
 <body>
@@ -419,7 +490,7 @@ a {
             <div class="form-grid">
                 <div class="form-group">
                     <label>Product Name</label>
-                  <input type="text" name="name" id="add-name" required>
+                    <input type="text" name="name" id="add-name" required>
                 </div>
                 <div class="form-group">
                     <label>Price (₱)</label>
@@ -446,33 +517,49 @@ a {
 
     <!-- PRODUCTS DISPLAY -->
     <div class="productss">
-        <div class="products-title">All Products</div>
+        <div class="products-header">
+    <div class="products-title">All Products</div>
+    <input type="text" id="adminSearch" placeholder="Search products...">
+</div>
         <div class="products-grid" id="products-grid">
 
 <?php
-$result = $conn->query("SELECT * FROM admin_products");
-
-while($row = $result->fetch_assoc()){
+foreach($products as $row){
 ?>
+<div class="product-card <?php echo !$row['is_available'] ? 'unavailable' : ''; ?>" 
+     data-category="<?php echo htmlspecialchars($row['category']); ?>">
 
-<div class="product-card" data-category="<?php echo htmlspecialchars($row['category']); ?>">
     <img src="<?php echo htmlspecialchars($row['image']); ?>" alt="Product Image">
     <h3><?php echo $row['name']; ?></h3>
     <p>₱<?php echo number_format($row['price']); ?></p>
+
     <div class="actions">
-        <button type="button" class="edit-btn">Edit</button>
+
+        <!-- DELETE BUTTON (FORM FIXED) -->
         <form method="POST" style="display:inline;">
             <input type="hidden" name="delete_id" value="<?php echo $row['id']; ?>">
             <button type="submit" class="delete-btn">Delete</button>
         </form>
+
+        <!-- EDIT BUTTON -->
+        <button type="button" class="edit-btn">Edit</button>
+
+        <!-- TOGGLE AVAILABILITY -->
+        <form method="POST" style="display:inline;">
+            <input type="hidden" name="toggle_id" value="<?php echo $row['id']; ?>">
+            <button type="submit" class="unavailable-btn">
+                <?php echo $row['is_available'] ? 'Unavailable' : 'Available'; ?>
+            </button>
+        </form>
+
     </div>
 </div>
 <?php } ?>
 
-</div>
-</div>
+        </div>
+    </div>
 
-
+</div>
 
 <!-- EDIT MODAL -->
 <div class="modal-overlay" id="edit-modal-overlay">
@@ -488,7 +575,7 @@ while($row = $result->fetch_assoc()){
                 <option>Accessories</option>
             </select>
             <input type="hidden" id="edit-id">
-<input type="text" id="edit-price" placeholder="Price (₱)" required>
+            <input type="text" id="edit-price" placeholder="Price (₱)" required>
             <input type="file" id="edit-image-file" accept="image/*">
             <div class="modal-buttons">
                 <button type="submit" class="save-btn">Save</button>
@@ -513,8 +600,6 @@ while($row = $result->fetch_assoc()){
 <div id="notification">Product action completed!</div>
 
 <script>
-
-
 // ======================
 // NOTIFICATION FUNCTION
 // ======================
@@ -547,21 +632,19 @@ document.getElementById('edit-cancel').addEventListener('click', () => {
     productToEdit = null;
 });
 
-// BIND EDIT & DELETE BUTTONS
+// BIND EDIT, DELETE, UNAVAILABLE BUTTONS
 function bindEditDelete(card){
     const editBtn = card.querySelector('.edit-btn');
     const deleteBtn = card.querySelector('.delete-btn');
+    const unavailableBtn = card.querySelector('.unavailable-btn');
 
     // EDIT BUTTON
     editBtn.addEventListener('click', () => {
         productToEdit = card;
         editName.value = card.querySelector('h3').innerText;
         editCategory.value = card.getAttribute('data-category');
-
-        // Remove ₱ and commas
         const rawPrice = card.querySelector('p').innerText.replace('₱','').replace(/,/g,'');
         editPrice.value = rawPrice;
-
         editId.value = card.querySelector('input[name="delete_id"]').value;
         editImageFile.value = '';
         editModalOverlay.style.display = 'flex';
@@ -572,7 +655,6 @@ function bindEditDelete(card){
         productToDelete = card;
         deleteModalOverlay.style.display = 'flex';
     });
-}
 
 // SAVE EDIT (send to updateProduct.php)
 editForm.addEventListener('submit', e => {
@@ -589,18 +671,15 @@ editForm.addEventListener('submit', e => {
     fetch('updateProduct.php', { method: 'POST', body: formData })
     .then(res => res.text())
     .then(data => {
-        // Update DOM
         productToEdit.querySelector('h3').innerText = editName.value;
         productToEdit.setAttribute('data-category', editCategory.value);
         const priceNumber = parseFloat(editPrice.value.replace(/[^0-9.]/g,''));
         productToEdit.querySelector('p').innerText = `₱${priceNumber.toLocaleString()}`;
-
         if(editImageFile.files && editImageFile.files[0]){
             const reader = new FileReader();
             reader.onload = ev => productToEdit.querySelector('img').src = ev.target.result;
             reader.readAsDataURL(editImageFile.files[0]);
         }
-
         editModalOverlay.style.display='none';
         productToEdit = null;
         showNotification('Product Updated Successfully!');
@@ -621,14 +700,45 @@ cancelDeleteBtn.addEventListener('click', () => {
     productToDelete = null;
 });
 deleteModalOverlay.addEventListener('click', e => {
-    if(e.target === deleteModalOverlay){
-        deleteModalOverlay.style.display = 'none';
-        productToDelete = null;
-    }
+    if(e.target === deleteModalOverlay) deleteModalOverlay.style.display = 'none';
+});
+editModalOverlay.addEventListener('click', e => {
+    if(e.target === editModalOverlay) editModalOverlay.style.display = 'none';
 });
 
-// INITIAL BINDING FOR EXISTING PRODUCTS
-document.querySelectorAll('.product-card').forEach(card => bindEditDelete(card));
+// ACCOUNT DROPDOWN
+const accountBtn = document.getElementById('account-btn');
+const accountDropdown = document.getElementById('account-dropdown');
+accountBtn.addEventListener('click', () => accountDropdown.style.display = accountDropdown.style.display === 'block' ? 'none' : 'block');
+
+// LOGOUT
+document.getElementById('logout-btn').addEventListener('click', () => {
+    window.location.href = "adminLOGOUT.php";
+});
+
+// INIT
+document.querySelectorAll('.product-card').forEach(bindEditDelete);
+
+// ======================
+// ADMIN PRODUCTS SEARCH
+// ======================
+const searchInput = document.getElementById('adminSearch');
+const productCards = document.querySelectorAll('.product-card');
+
+searchInput.addEventListener('input', () => {
+    const query = searchInput.value.toLowerCase();
+    productCards.forEach(card => {
+        const name = card.querySelector('h3').innerText.toLowerCase();
+        const category = card.getAttribute('data-category').toLowerCase();
+        if(name.includes(query) || category.includes(query)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
+
 </script>
+
 </body>
 </html>

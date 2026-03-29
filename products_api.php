@@ -21,7 +21,9 @@ $action = $_POST["action"] ?? '';
 
 // ================== FETCH PRODUCTS ==================
 if ($action === "fetch") {
-    $result = $conn->query("SELECT * FROM products ORDER BY id DESC");
+    $result = $conn->query("SELECT id, name, price, category, image, is_available 
+                        FROM products 
+                        ORDER BY id DESC");
     $products = [];
 
     while ($row = $result->fetch_assoc()) {
